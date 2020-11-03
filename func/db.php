@@ -6634,12 +6634,17 @@
 
 				// Total Productos costo
 				$costo_tmp = 0;
-				$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+				$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
 
 				while($row_costo = mysqli_fetch_array($costo_data))
 				{
 					$costo_tmp = $costo_tmp + $row_costo[0];
 					$total_costo = $total_costo + $row_costo[0];
+				}
+
+				if ($row[9] == 1)
+				{
+					$costo_tmp = $row[5];
 				}
 				//
 
@@ -6827,12 +6832,17 @@
 
 				// Total Productos costo
 				$costo_tmp = 0;
-				$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+				$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
 
 				while($row_costo = mysqli_fetch_array($costo_data))
 				{
 					$costo_tmp = $costo_tmp + $row_costo[0];
 					$total_costo = $total_costo + $row_costo[0];
+				}
+
+				if ($row[9] == 1)
+				{
+					$costo_tmp = $row[5];
 				}
 				//
 

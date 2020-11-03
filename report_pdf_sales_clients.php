@@ -20,19 +20,19 @@
     $con = db_conectar();  
     if ($vendedor > 0 && $sucursal == 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
     }
     elseif ($vendedor == 0 && $sucursal > 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.client = '$client' order by  f.fecha_venta desc ");
     }
     elseif ($vendedor > 0 && $sucursal > 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
     }
     else
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = s.id  and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = s.id  and f.client = '$client' order by  f.fecha_venta desc ");
     }
     
     $body = '';
@@ -57,12 +57,17 @@
         
         // Total Productos costo
         $costo_tmp = 0;
-        $costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+        $costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
 
         while($row_costo = mysqli_fetch_array($costo_data))
         {
             $costo_tmp = $costo_tmp + $row_costo[0];
             $total_costo = $total_costo + $row_costo[0];
+        }
+
+        if ($row[9] == 1)
+        {
+            $costo_tmp = $row[5];
         }
         //
                 
