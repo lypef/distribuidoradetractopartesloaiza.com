@@ -133,7 +133,7 @@
     $total_pagar = number_format($total_pagar,2,".",",");
     $iva_ = number_format($iva_,2,".",",");
     
-    $abonos = mysqli_query($con,"SELECT folio, cobrado, fecha_venta FROM folio_venta WHERE folio_venta_ini = '$folio'");
+    $abonos = mysqli_query($con,"SELECT folio, cobrado, fecha_venta FROM folio_venta WHERE folio_venta_ini = '$folio' and folio != '$folio';");
 
     $pagos .= '
     <tr>

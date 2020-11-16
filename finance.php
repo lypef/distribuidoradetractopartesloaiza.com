@@ -1,14 +1,6 @@
 <?php
     include 'func/header.php';
 ?>
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2018.2.620/styles/kendo.common.min.css"/>
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2018.2.620/styles/kendo.rtl.min.css"/>
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2018.2.620/styles/kendo.silver.min.css"/>
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2018.2.620/styles/kendo.mobile.all.min.css"/>
-
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="/kendo/kendo.all.min.js"></script>
-  
     <div class="section-title-2 text-uppercase mb-40 text-center">
         <h4>SELECCIONE UNA FECHA ESPECIFICA</h4>
     </div>
@@ -16,14 +8,17 @@
 
     <div class="row">
             
-        <div class="col-md-3 text-right">
+    <div class="col-md-2 text-center">
             <label>Fecha de inicio</label><br>
-            <input id="datepicker0" name="inicio">
+            <input type="date" id="inicio" name="inicio"
+			value="<?php echo $_GET["inicio"]; ?>" style="text-align: center; height:40px; border: 2px solid #D9D7D7;" >
+            
         </div>
 
-        <div class="col-md-3 text-center">
+        <div class="col-md-2 text-center">
             <label>Fecha de finalizacion</label><br>
-            <input id="datepicker1" name="finaliza">
+            <input type="date" id="finaliza" name="finaliza"
+			value="<?php echo $_GET["finaliza"]; ?>" style="text-align: center; height:40px; border: 2px solid #D9D7D7;" >
         </div>
 
         <div class="col-md-3 text-center">
@@ -82,44 +77,7 @@
         <h4>REPORTE DE VENTAS <?php if ($_GET["inicio"]) {echo ': DESDE:'.$_GET["inicio"]; } if ($_GET["finaliza"]) {echo ' | HASTA:'.$_GET["finaliza"]; } ?></h4>
     </div>
 
-<script id="cell-template" type="text/x-kendo-template">
-    <span class="#= isInArray(data.date, data.dates) ? 'party' : '' #">#= data.value #</span>
-</script>
-
 <script>
-  var fecha = new Date();
-
-  $("#datepicker0").kendoDatePicker({
-    value: new Date(),
-    month: {
-      content: $("#cell-template").html()
-    }
-  });
-
-  $("#datepicker1").kendoDatePicker({
-    value: new Date(),
-    month: {
-      content: $("#cell-template").html()
-    },
-    dates: [
-      new Date(2000, 10, 10),
-      new Date(2000, 10, 30)
-    ] //can manipulate month template depending on this array.
-  });
-
-  function isInArray(date, dates) {
-    for(var idx = 0, length = dates.length; idx < length; idx++) {
-      var d = dates[idx];
-      if (date.getFullYear() == d.getFullYear() &&
-          date.getMonth() == d.getMonth() &&
-          date.getDate() == d.getDate()) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
     if (getUrlVars()["usuario"])
     {
         document.getElementById("usuario").value = getUrlVars()["usuario"];

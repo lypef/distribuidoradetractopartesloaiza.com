@@ -23,74 +23,208 @@
     $con = db_conectar();  
     if ($vendedor > 0 && $sucursal == 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
     }
     elseif ($vendedor == 0 && $sucursal > 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.client = '$client' order by  f.fecha_venta desc ");
     }
     elseif ($vendedor > 0 && $sucursal > 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.vendedor = '$vendedor' and f.client = '$client' order by  f.fecha_venta desc ");
     }
     else
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = s.id  and f.client = '$client' order by  f.fecha_venta desc ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = s.id  and f.client = '$client' order by  f.fecha_venta desc ");
     }
     
     $body = '';
     while($row = mysqli_fetch_array($sales))
     {
-        if ($row[8] == "efectivo")
-        {
-            $efectivo = $efectivo + $row[5];
-        }
-        elseif ($row[8] == "transferencia")
-        {
-            $transferencia = $transferencia + $row[5];
-        }
-        elseif ($row[8] == "deposito")
-        {
-            $deposito = $deposito + $row[5];
-        }
-        elseif ($row[8] == "tarjeta")
-        {
-            $tarjeta = $tarjeta + $row[5];
-        }
-        
-        // Total Productos costo
-        $costo_tmp = 0;
-        $costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+        if (!$row[10])
+			{
+				
+				if ($row[9] == 1)
+				{
+					if ($row[0] == $row[11])
+					{
+						// Venta pedido
 
-        while($row_costo = mysqli_fetch_array($costo_data))
-        {
-            $costo_tmp = $costo_tmp + $row_costo[0];
-            $total_costo = $total_costo + $row_costo[0];
-        }
+						if ($row[8] == "efectivo")
+						{
+							$efectivo = $efectivo + $row[5];
+						}
+						elseif ($row[8] == "transferencia")
+						{
+							$transferencia = $transferencia + $row[5];
+						}
+						elseif ($row[8] == "tarjeta")
+						{
+							$cheque = $cheque + $row[5];
+						}
+						elseif ($row[8] == "deposito")
+						{
+							$deposito = $deposito + $row[5];
+						}
 
-        if ($row[9] == 1)
-        {
-            $costo_tmp = $row[5];
-        }
-        //
-                
-        $body = $body.'
-        <tr>
-        <td class="item-des">'.$row[0].'</td>
-        <td class="item-des"><p>'.$row[1].'</p></td>
-        <td class="item-des"><p>'.$row[2].'</p></td>
-        <td class="item-des"><p>'.$row[7].'</p></td>
-        <td class="item-des"><p>'.$row[6].'</p></td>
-        <td class="item-des"><center><p>'.$row[3].' %</p></center></td>
-        
-        <td class="item-des"><center><p>$ '.number_format($costo_tmp,2,".",",").'</p></center></td>
-        <td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
-        <td class="item-des"><center><p>$ '.number_format($row[5],2,".",",").'</p></center></td>
+						$folio_ = '<td class="item-des">'.$row[0].'</td>';
+						$facturar = '
+						<a href="/facturar.php?folio='.$row[0].'&stocck=0" target="_blank" class="button extra-small button-black mb-20" ><span>Emitir</span> </a>
+						';
+				
+						// Total Productos costo
+						$costo_tmp = 0;
+						$costo_data = mysqli_query($con_costo,"SELECT SUM(productos.precio_costo * pedido.unidades ) as total_costo FROM product_pedido pedido, productos productos WHERE pedido.product = productos.id and folio_venta = $row[0] ");
 
-        <td class="item-des uppercase"><center><p>'.strtoupper($row[8]).'</p></center></td>
-        </tr>
-        ';
-        $total = $total + $row[5];
+						while($row_costo = mysqli_fetch_array($costo_data))
+						{
+							$costo_tmp = $costo_tmp + $row_costo[0];
+							$total_costo = $total_costo + $row_costo[0];
+						}
+
+						$costo_data = mysqli_query($con_costo,'SELECT SUM(unidades * precio ) as total_costo FROM product_pedido WHERE p_generico != "" and folio_venta = '.$row[0].';');
+
+						while($row_costo = mysqli_fetch_array($costo_data))
+						{
+							$costo_tmp = $costo_tmp + $row_costo[0];
+							$total_costo = $total_costo + $row_costo[0];
+						}
+						//
+
+							$body = $body.'
+							<tr>
+							'.$folio_.'
+							<td class="item-des"><p>'.$row[1].'</p></td>
+							<td class="item-des"><p>'.$row[2].'</p></td>
+							<td class="item-des"><p>'.$row[7].'</p></td>
+							<td class="item-des"><p>'.$row[6].'</p></td>
+
+							<td class="item-des"><center><p>$ '.number_format($costo_tmp,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
+							
+							<td class="item-des uppercase"><center><p>'.$row[8].'</p></center></td>
+							
+							</tr>
+							';
+							
+						$total = $total + $row[5];
+						// Finaliza venta pedido
+					}else
+					{
+						// Inicia abono pedidos
+						$folio_ = '<td class="item-des">'.$row[0].'</td>';
+						$facturar = '
+						<table style="" width="100%">
+						<tbody>
+						<tr>
+						<td style="">
+						<a href="/sale_finaly_report_orderprint.php?folio_sale='.$row[11].'" target="_blank" class="button extra-small button-black mb-20" ><span>PDF</span> </a>
+						</td>
+						
+						<td style="">
+						<a href="/facturar.php?folio='.$row[0].'&stocck=0" target="_blank" class="button extra-small button-black mb-20" ><span>Emitir</span> </a>
+						</td>
+						</tr>
+						</tbody>
+						</table>
+						';
+				
+						// Total Productos costo
+						$costo_tmp = 0;
+						$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+
+						while($row_costo = mysqli_fetch_array($costo_data))
+						{
+							$costo_tmp = $costo_tmp + $row_costo[0];
+							$total_costo = $total_costo + $row_costo[0];
+						}
+
+						if ($row[9] == 1)
+						{
+							$costo_tmp = $row[5];
+						}
+						//
+
+							$body = $body.'
+							<tr>
+							'.$folio_.'
+							<td class="item-des"><p>'.$row[1].'</p></td>
+							<td class="item-des"><p>'.$row[2].'</p></td>
+							<td class="item-des"><p>'.$row[7].'</p></td>
+							<td class="item-des"><p>'.$row[6].'</p></td>
+
+							<td class="item-des"><center><p>$ '.number_format(0,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
+							
+							<td class="item-des uppercase"><center><p>'.$row[8].'</p></center></td>
+							</tr>
+							';
+							
+						// Finaliza Abonos de pedidos
+					}
+				}else
+				{
+					// Ventas normales 
+
+					if ($row[8] == "efectivo")
+					{
+						$efectivo = $efectivo + $row[5];
+					}
+					elseif ($row[8] == "transferencia")
+					{
+						$transferencia = $transferencia + $row[5];
+					}
+					elseif ($row[8] == "tarjeta")
+					{
+						$cheque = $cheque + $row[5];
+					}
+					elseif ($row[8] == "deposito")
+					{
+						$deposito = $deposito + $row[5];
+					}
+
+					$folio_ = '<td class="item-des">'.$row[0].'</td>';
+                    $facturar = '
+                    <a href="/facturar.php?folio='.$row[0].'&stocck=1" target="_blank" class="button extra-small button-black mb-20" ><span>Emitir</span> </a>
+					';
+			
+					// Total Productos costo
+					$costo_tmp = 0;
+					$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+
+					while($row_costo = mysqli_fetch_array($costo_data))
+					{
+						$costo_tmp = $costo_tmp + $row_costo[0];
+						$total_costo = $total_costo + $row_costo[0];
+					}
+
+					if ($row[9] == 1)
+					{
+						$costo_tmp = $row[5];
+					}
+					//
+
+						$body = $body.'
+						<tr>
+						'.$folio_.'
+						<td class="item-des"><p>'.$row[1].'</p></td>
+						<td class="item-des"><p>'.$row[2].'</p></td>
+						<td class="item-des"><p>'.$row[7].'</p></td>
+						<td class="item-des"><p>'.$row[6].'</p></td>
+
+						<td class="item-des"><center><p>$ '.number_format($costo_tmp,2,".",",").'</p></center></td>
+						<td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
+						<td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
+						
+						<td class="item-des uppercase"><center><p>'.$row[8].'</p></center></td>
+						</tr>
+						';
+						$total = $total + $row[5];
+					}
+					// Finaliza Ventas normales 
+				}
     }
     
     $codigoHTML='
@@ -107,7 +241,6 @@
         <th class="table-head th-name uppercase">CLIENTE</th>
         <th class="table-head th-name uppercase">SUCURSAL</th>
         <th class="table-head th-name uppercase">F.VENTA</th>
-        <th class="table-head th-name uppercase">DESCUENTO</th>
         <th class="table-head th-name uppercase">COSTO</th>
         <th class="table-head th-name uppercase">UTILIDAD</th>
         <th class="table-head th-name uppercase">COBRADO</th>
@@ -121,66 +254,69 @@
     <div align="right">';
     
     if ($efectivo > 0)
-    {
-        $codigoHTML .= '
-        <h5>Efectivo: $ '.number_format($efectivo,2,".",",").' MXN</h5>
-        ';
-    }
+		{
+			$codigoHTML .= '
+			<h5>Efectivo: $ '.number_format($efectivo,2,".",",").' MXN</h5>
+			';
+		}
 
-    if ($transferencia > 0)
-    {
-        $codigoHTML .= '
-        <h5>Tranferencia: $ '.number_format($transferencia,2,".",",").' MXN</h5>
-        ';
-    }
+		if ($transferencia > 0)
+		{
+			$codigoHTML .= '
+			<h5>Tranferencia: $ '.number_format($transferencia,2,".",",").' MXN</h5>
+			';
+		}
 
-    if ($tarjeta > 0)
-    {
-        $codigoHTML .=  '
-        <h5>Tarjeta: $ '.number_format($tarjeta,2,".",",").' MXN</h5>
-        ';
-    }
-
-    if ($deposito > 0)
-    {
-        $codigoHTML .= '
-        <h5>Depositos: $ '.number_format($deposito,2,".",",").' MXN</h5>
-        ';
-    }
+        if ($tarjeta > 0)
+		{
+			$codigoHTML .=  '
+			<h5>Tarjeta: $ '.number_format($tarjeta,2,".",",").' MXN</h5>
+			';
+        }
+        
+		if ($cheque > 0)
+		{
+			$codigoHTML .= '
+			<h5>Cheque: $ '.number_format($cheque,2,".",",").' MXN</h5>
+			';
+		}
     
-    $codigoHTML .= '<table style="width: 100%;">
-		<tbody>
-		<tr>
-		<td style="width: 52px; text-align: center;"><strong>TOTAL COSTO</strong></td>
-		<td style="width: 65px; text-align: center;"><strong>TOTAL UTILIDAD</strong></td>
-		<td style="width: 83.4667px; text-align: center;"><strong>TOTAL COBRADO</strong></td>
-		</tr>
-		<tr>
-		<td style="width: 52px; text-align: right;">$ '.number_format($total_costo,2,".",",").' MXN</td>
-		<td style="width: 65px; text-align: right;">$ '.number_format($total - $total_costo,2,".",",").' MXN</td>
-		<td style="width: 83.4667px; text-align: right;">$ '.number_format($total,2,".",",").' MXN</td>
-		</tr>
-		</tbody>
-		</table>
-		<br>
-
-		<table style="width: 100%;">
-		<tbody>
-		<tr>
-		<td style="width: 52px; text-align: center;"><strong>TOTAL COSTO SIN IVA</strong></td>
-		<td style="width: 65px; text-align: center;"><strong>TOTAL UTILIDAD SIN IVA</strong></td>
-		<td style="width: 83.4667px; text-align: center;"><strong>TOTAL COBRADO SIN IVA</strong></td>
-		</tr>
-		<tr>
-		<td style="width: 52px; text-align: right;">$ '.number_format($total_costo / 1.160000,2,".",",").' MXN</td>
-		<td style="width: 65px; text-align: right;">$ '.number_format(($total - $total_costo) / 1.160000,2,".",",").' MXN</td>
-		<td style="width: 83.4667px; text-align: right;">$ '.number_format($total / 1.160000,2,".",",").' MXN</td>
-		</tr>
-		</tbody>
-		</table>
-		<br>
-	</div>
+    $codigoHTML .= '
+    </div>
     <br>
+
+    <table style="width: 100%;">
+			<tbody>
+			<tr>
+			<td style="width: 52px; text-align: center;"><strong>TOTAL COSTO</strong></td>
+			<td style="width: 65px; text-align: center;"><strong>TOTAL UTILIDAD</strong></td>
+			<td style="width: 83.4667px; text-align: center;"><strong>TOTAL COBRADO</strong></td>
+			</tr>
+			<tr>
+			<td style="width: 52px; text-align: right;">$ '.number_format($total_costo,2,".",",").' MXN</td>
+			<td style="width: 65px; text-align: right;">$ '.number_format($total - $total_costo,2,".",",").' MXN</td>
+			<td style="width: 83.4667px; text-align: right;">$ '.number_format($total,2,".",",").' MXN</td>
+			</tr>
+			</tbody>
+			</table>
+			<br>
+
+			<table style="width: 100%;">
+			<tbody>
+			<tr>
+			<td style="width: 52px; text-align: center;"><strong>TOTAL COSTO SIN IVA</strong></td>
+			<td style="width: 65px; text-align: center;"><strong>TOTAL UTILIDAD SIN IVA</strong></td>
+			<td style="width: 83.4667px; text-align: center;"><strong>TOTAL COBRADO SIN IVA</strong></td>
+			</tr>
+			<tr>
+			<td style="width: 52px; text-align: right;">$ '.number_format($total_costo / 1.160000,2,".",",").' MXN</td>
+			<td style="width: 65px; text-align: right;">$ '.number_format(($total - $total_costo) / 1.160000,2,".",",").' MXN</td>
+			<td style="width: 83.4667px; text-align: right;">$ '.number_format($total / 1.160000,2,".",",").' MXN</td>
+			</tr>
+			</tbody>
+			</table>
+            <br>
+            
     <footer>
       <center><p>CLTA DESARROLLO & DISTRIBUCION DE SOFTWARE<br><a href="http://www.cyberchoapas.com"> www.cyberchoapas.com</a></p></center>
     </footer>

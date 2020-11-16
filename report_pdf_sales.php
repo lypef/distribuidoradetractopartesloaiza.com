@@ -19,81 +19,212 @@
     $con = db_conectar();  
     if ($folio != "" && $vendedor == 0 && $sucursal == 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.folio = '$folio'");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.folio = '$folio'");
     }
     elseif ($folio == "" && $vendedor > 0 && $sucursal == 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.vendedor = '$vendedor'");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.vendedor = '$vendedor'");
     }
     elseif ($folio == "" && $vendedor == 0 && $sucursal > 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal'");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal'");
     }
     elseif ($folio == "" && $vendedor > 0 && $sucursal > 0)
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.vendedor = '$vendedor' ");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza' and f.sucursal = '$sucursal' and f.vendedor = '$vendedor' ");
     }
     else
     {
-        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza'");
+        $sales = mysqli_query($con,"SELECT f.folio, v.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.t_pago, f.pedido, f.concepto, f.folio_venta_ini FROM folio_venta f, clients c, users v, sucursales s  WHERE f.vendedor = v.id and f.client = c.id and f.open = 0 and f.sucursal = s.id and f.fecha_venta >= '$inicio' and f.fecha_venta <= '$finaliza'");
     }
     
     $body = '';
     while($row = mysqli_fetch_array($sales))
     {
-        if ($row[5] > 0)
-        {
-            if ($row[8] == "efectivo")
-            {
-                $efectivo = $efectivo + $row[5];
-            }
-            elseif ($row[8] == "transferencia")
-            {
-                $transferencia = $transferencia + $row[5];
-            }
-            elseif ($row[8] == "cheque")
-            {
-                $cheque = $cheque + $row[5];
-            }
-            elseif ($row[8] == "tarjeta")
-            {
-                $tarjeta = $tarjeta + $row[5];
-            }
-                
-            // Total Productos costo
-            $costo_tmp = 0;
-            $costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+        if (!$row[10])
+			{
+				
+				if ($row[9] == 1)
+				{
+					if ($row[0] == $row[11])
+					{
+						// Venta pedido
 
-            while($row_costo = mysqli_fetch_array($costo_data))
-            {
-                $costo_tmp = $costo_tmp + $row_costo[0];
-                $total_costo = $total_costo + $row_costo[0];
-            }
+						if ($row[8] == "efectivo")
+						{
+							$efectivo = $efectivo + $row[5];
+						}
+						elseif ($row[8] == "transferencia")
+						{
+							$transferencia = $transferencia + $row[5];
+						}
+						elseif ($row[8] == "tarjeta")
+						{
+							$cheque = $cheque + $row[5];
+						}
+						elseif ($row[8] == "deposito")
+						{
+							$deposito = $deposito + $row[5];
+						}
 
-            if ($row[9] == 1)
-            {
-                $costo_tmp = $row[5];
-            }
-            //
-                
-            $body = $body.'
-            <tr>
-            <td class="item-des">'.$row[0].'</td>
-            <td class="item-des"><p>'.$row[1].'</p></td>
-            <td class="item-des"><p>'.$row[2].'</p></td>
-            <td class="item-des"><p>'.$row[7].'</p></td>
-            <td class="item-des"><p>'.$row[6].'</p></td>
-            <td class="item-des"><center><p>'.$row[3].' %</p></center></td>
-            
-            <td class="item-des"><center><p>$ '.number_format($costo_tmp,2,".",",").'</p></center></td>
-            <td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
-            <td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
-            
-            <td class="item-des uppercase"><center><p>'.strtoupper($row[8]).'</p></center></td>
-            </tr>
-            ';
-            $total = $total + $row[5];
-        }
+						$folio_ = '<td class="item-des">'.$row[0].'</td>';
+						$facturar = '
+						<a href="/facturar.php?folio='.$row[0].'&stocck=0" target="_blank" class="button extra-small button-black mb-20" ><span>Emitir</span> </a>
+						';
+				
+						// Total Productos costo
+						$costo_tmp = 0;
+						$costo_data = mysqli_query($con_costo,"SELECT SUM(productos.precio_costo * pedido.unidades ) as total_costo FROM product_pedido pedido, productos productos WHERE pedido.product = productos.id and folio_venta = $row[0] ");
+
+						while($row_costo = mysqli_fetch_array($costo_data))
+						{
+							$costo_tmp = $costo_tmp + $row_costo[0];
+							$total_costo = $total_costo + $row_costo[0];
+						}
+
+						$costo_data = mysqli_query($con_costo,'SELECT SUM(unidades * precio ) as total_costo FROM product_pedido WHERE p_generico != "" and folio_venta = '.$row[0].';');
+
+						while($row_costo = mysqli_fetch_array($costo_data))
+						{
+							$costo_tmp = $costo_tmp + $row_costo[0];
+							$total_costo = $total_costo + $row_costo[0];
+						}
+						//
+
+							$body = $body.'
+							<tr>
+							'.$folio_.'
+							<td class="item-des"><p>'.$row[1].'</p></td>
+							<td class="item-des"><p>'.$row[2].'</p></td>
+							<td class="item-des"><p>'.$row[7].'</p></td>
+							<td class="item-des"><p>'.$row[6].'</p></td>
+
+							<td class="item-des"><center><p>$ '.number_format($costo_tmp,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
+							
+							<td class="item-des uppercase"><center><p>'.$row[8].'</p></center></td>
+							
+							</tr>
+							';
+							
+						$total = $total + $row[5];
+						// Finaliza venta pedido
+					}else
+					{
+						// Inicia abono pedidos
+						$folio_ = '<td class="item-des">'.$row[0].'</td>';
+						$facturar = '
+						<table style="" width="100%">
+						<tbody>
+						<tr>
+						<td style="">
+						<a href="/sale_finaly_report_orderprint.php?folio_sale='.$row[11].'" target="_blank" class="button extra-small button-black mb-20" ><span>PDF</span> </a>
+						</td>
+						
+						<td style="">
+						<a href="/facturar.php?folio='.$row[0].'&stocck=0" target="_blank" class="button extra-small button-black mb-20" ><span>Emitir</span> </a>
+						</td>
+						</tr>
+						</tbody>
+						</table>
+						';
+				
+						// Total Productos costo
+						$costo_tmp = 0;
+						$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+
+						while($row_costo = mysqli_fetch_array($costo_data))
+						{
+							$costo_tmp = $costo_tmp + $row_costo[0];
+							$total_costo = $total_costo + $row_costo[0];
+						}
+
+						if ($row[9] == 1)
+						{
+							$costo_tmp = $row[5];
+						}
+						//
+
+							$body = $body.'
+							<tr>
+							'.$folio_.'
+							<td class="item-des"><p>'.$row[1].'</p></td>
+							<td class="item-des"><p>'.$row[2].'</p></td>
+							<td class="item-des"><p>'.$row[7].'</p></td>
+							<td class="item-des"><p>'.$row[6].'</p></td>
+
+							<td class="item-des"><center><p>$ '.number_format(0,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
+							<td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
+							
+							<td class="item-des uppercase"><center><p>'.$row[8].'</p></center></td>
+							</tr>
+							';
+							
+						// Finaliza Abonos de pedidos
+					}
+				}else
+				{
+					// Ventas normales 
+
+					if ($row[8] == "efectivo")
+					{
+						$efectivo = $efectivo + $row[5];
+					}
+					elseif ($row[8] == "transferencia")
+					{
+						$transferencia = $transferencia + $row[5];
+					}
+					elseif ($row[8] == "tarjeta")
+					{
+						$cheque = $cheque + $row[5];
+					}
+					elseif ($row[8] == "deposito")
+					{
+						$deposito = $deposito + $row[5];
+					}
+
+					$folio_ = '<td class="item-des">'.$row[0].'</td>';
+                    $facturar = '
+                    <a href="/facturar.php?folio='.$row[0].'&stocck=1" target="_blank" class="button extra-small button-black mb-20" ><span>Emitir</span> </a>
+					';
+			
+					// Total Productos costo
+					$costo_tmp = 0;
+					$costo_data = mysqli_query($con_costo,"SELECT SUM(p.precio_costo * v.unidades ) as total_costo FROM product_venta v, productos p WHERE v.product = p.id and v.folio_venta = $row[0] ");
+
+					while($row_costo = mysqli_fetch_array($costo_data))
+					{
+						$costo_tmp = $costo_tmp + $row_costo[0];
+						$total_costo = $total_costo + $row_costo[0];
+					}
+
+					if ($row[9] == 1)
+					{
+						$costo_tmp = $row[5];
+					}
+					//
+
+						$body = $body.'
+						<tr>
+						'.$folio_.'
+						<td class="item-des"><p>'.$row[1].'</p></td>
+						<td class="item-des"><p>'.$row[2].'</p></td>
+						<td class="item-des"><p>'.$row[7].'</p></td>
+						<td class="item-des"><p>'.$row[6].'</p></td>
+
+						<td class="item-des"><center><p>$ '.number_format($costo_tmp,2,".",",").'</p></center></td>
+						<td class="item-des"><center><p>$ '.number_format($row[5] - $costo_tmp,2,".",",").'</p></center></td>
+						<td class="item-des"><center><p>$ '.$row[5].'</p></center></td>
+						
+						<td class="item-des uppercase"><center><p>'.$row[8].'</p></center></td>
+						</tr>
+						';
+						$total = $total + $row[5];
+					}
+					// Finaliza Ventas normales 
+				}
     }
     
     $codigoHTML='
@@ -110,7 +241,6 @@
         <th class="table-head th-name uppercase">CLIENTE</th>
         <th class="table-head th-name uppercase">SUCURSAL</th>
         <th class="table-head th-name uppercase">F.VENTA</th>
-        <th class="table-head th-name uppercase">DESCUENTO</th>
         <th class="table-head th-name uppercase">COSTO</th>
         <th class="table-head th-name uppercase">UTILIDAD</th>
         <th class="table-head th-name uppercase">COBRADO</th>

@@ -6,7 +6,7 @@
     $folio = $_POST['folio'];
     $total = 0;
     $descuento = Sale_Descuento($folio);
-    
+    $fecha = date("Y-m-d H:i:s");
 
     $Lproducts = mysqli_query($con,"SELECT product, unidades, precio, p_generico FROM `product_pedido` where folio_venta = '$folio';");
     while($row = mysqli_fetch_array($Lproducts))
@@ -37,7 +37,7 @@
     
     if ($adeudo <= 0)
     {
-        mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0' WHERE folio = $folio;");
+        mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', cobrado = '$total', fecha_venta = '$fecha' WHERE folio = $folio;");
         if (!mysqli_error($con))
         {
             echo '<script>location.href = "/orders.php?folio='.$folio.'&sale_finaly=true"</script>';
