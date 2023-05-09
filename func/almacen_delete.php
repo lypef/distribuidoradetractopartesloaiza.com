@@ -5,9 +5,7 @@
     $id = $_POST['id'];
     
     $con = db_conectar();  
-    
-    if ($_SESSION['token'] == GetToken())
-    {mysqli_query($con,"DELETE FROM almacen WHERE id = '$id';");}
+    mysqli_query($con,"DELETE FROM almacen WHERE id = '$id';");
 
     if (!mysqli_error($con))
     {

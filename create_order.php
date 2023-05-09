@@ -3,12 +3,12 @@
 ?>
 <div class="col-md-12">
     <div class="section-title-2 text-uppercase mb-40 text-center">
-            <h4>SELECCIONE CLIENTE PARA REALIZAR PEDIDO</h4>
+            <h4>SELECCIONE CONTACTO PARA REALIZAR PEDIDO</h4>
     </div>
     <?php 
         if ($_GET["search"])
         {
-            echo create_sale_SelectClientSearchOrder($_GET["search"], $_GET["pagina"]);
+            echo create_sale_SelectClientSearchOrder($_GET["search"],$_GET["pagina"]);
         }else
         {
             echo create_sale_SelectClientOrder($_GET["pagina"]);
@@ -31,7 +31,7 @@ if (getUrlVars()["clientreturn"])
     include 'func/footer.php';
     if ($_GET["search"])
     {
-        echo select_client_sale_modal_search_order($_GET["search"], $_GET["pagina"]);
+        echo select_client_sale_modal_search_order($_GET["search"],$_GET["pagina"]);
     }else
     {
         echo select_client_sale_modal_order($_GET["pagina"]);

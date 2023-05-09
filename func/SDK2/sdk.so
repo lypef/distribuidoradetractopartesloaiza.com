@@ -1,16 +1,19 @@
 <?php
-// <!-- phpDesigner :: Timestamp [28/05/2015 01:10:04 p. m.] -->
-//error_reporting(~(E_WARNING|E_NOTICE));
-error_reporting(0);
+// <!-- phpDesigner :: Timestamp [13/12/2018 10:34:51 a. m.] -->
+error_reporting(~(E_WARNING|E_NOTICE));
+//error_reporting(0);
+//error_reporting(E_ALL);
 date_default_timezone_set('America/Mexico_City');
 
 $archivo_ini=$argv[1];
-$archivo_ini=str_replace('\\','/',$archivo_ini);
+ $archivo_ini=str_replace('\\','/',$archivo_ini);
 
     include 'sdk2.php';
 
 if(file_exists($archivo_ini)==true)
 {
+	
+
     $ini_string=file_get_contents($archivo_ini);
 
 
@@ -24,10 +27,19 @@ if(file_exists($archivo_ini)==true)
     if (preg_match('!\S!u', $ini_string))
     {
         $ini_string=utf8_decode($ini_string);
+        
+        
+    }else{
+        
+        $ini_string=utf8_encode($ini_string);
+        
     }
-    $conf=ini_to_array_cfdi($ini_string);
-	init_sdk($conf);
+    
 
+    $conf=ini_to_array_cfdi($ini_string);
+	
+	init_sdk($conf);
+    
     if($conf['cancelar'] == 'SI')
     {
         $respuesta = cfdi_cancelar($conf);
@@ -51,8 +63,17 @@ if(file_exists($archivo_ini)==true)
     
     
         $modo_saldo=$conf['SALDO'];
-        $REPORTE_TIMBRADOS=$conf['REPORTE_TIMBRADOS'];        
-        
+        $REPORTE_TIMBRADOS=$conf['REPORTE_TIMBRADOS'];
+		if(count($conf['rFE'])>1)
+		{
+			
+			$panama=1;			
+		}
+		if($conf['receptor']['rfc']!='')
+		{
+			$cfdi=1;
+        }
+
 		if($conf['retencion']=='SI')
 		{
 			require_once 'sdk2.php';
@@ -60,6 +81,7 @@ if(file_exists($archivo_ini)==true)
 		}
 		else
 		{
+			
 			if($REPORTE_TIMBRADOS=='SI')
 			{
 				$usuario_=$conf['PAC']['usuario'];
@@ -74,18 +96,30 @@ if(file_exists($archivo_ini)==true)
 				$clave_= $conf['PAC']['pass'];
 				$respuesta=saldo_mf($usuario_,$clave_);
 			}
-			elseif($sucursal==0)
+			elseif($panama==1)
 			{
-				$respuesta=mf_genera_cfdi($conf);
-			}
+//print_r($conf);
+				$respuesta = mf_genera_fepanama($conf);
+			}			
+			elseif($cfdi==1)
+			{			
+				if($conf['version_cfdi']=='4.0'){
+				    
+                    $respuesta=mf_genera_cfdi4($conf);
+				}else{
+				    $respuesta=mf_genera_cfdi($conf);
+				}
+                
+    //print_r($respuesta);
+			}			
 			else
 			{
-				$respuesta= ticket_generar($conf);
+//				$respuesta= ticket_generar($conf);
 			}
 		}
     }
      
-     $modo_salida=$conf['MODOINI'];
+    $modo_salida=$conf['MODOINI'];
 
 
      //INI MODO DEFAULT
@@ -93,7 +127,9 @@ if(file_exists($archivo_ini)==true)
      {
 //DEFAULT
         case 'INI' : 
+
             $respuesta_ini= arr2ini($respuesta); 
+			
             break; 
 
         case 'JSON' : 
@@ -126,9 +162,9 @@ if(file_exists($archivo_ini)==true)
      }
      
      
-     if($conf['RESPUESTA_UTF8']=='SI')
+     if($conf['RESPUESTA_UTF8']=='NO')
      {
-         $respuesta_ini=utf8_encode($respuesta_ini);
+         $respuesta_ini=utf8_decode($respuesta_ini);
      }
      
 

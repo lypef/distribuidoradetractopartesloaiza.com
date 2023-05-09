@@ -1,18 +1,19 @@
 <?php
-  date_default_timezone_set('America/Mexico_City');
-  error_reporting(0);
-  include 'db.php';
-  loginPermanent($_SERVER["REQUEST_URI"]);
-  db_sessionValidarNO();
+    date_default_timezone_set('America/Mazatlan');
+    error_reporting(0);
+    include 'db.php';
+    loginPermanent($_SERVER["REQUEST_URI"]);
+    db_sessionValidarNO();
 
     $departamentos = mysqli_query(db_conectar(),"SELECT id, nombre FROM departamentos");
     $departamentos_ = mysqli_query(db_conectar(),"SELECT id, nombre FROM departamentos");
-    $almacenes = mysqli_query(db_conectar(),"SELECT id, nombre FROM almacen");
-    $sales_open = mysqli_query(db_conectar(),"SELECT f.folio, v.nombre, c.nombre, f.fecha, f.descuento, f.iva FROM folio_venta f, clients c, users v where f.client = c.id and f.vendedor = v.id and f.open = 1 and f.pedido = 0 and f.cotizacion = 0");
+    $almacenes = mysqli_query(db_conectar(),"SELECT a.id, a.nombre FROM sucursal_almacen sa, almacen a WHERE sa.almacen = a.id and sa.sucursal = $_SESSION[sucursal] ");
+    $sales_open = mysqli_query(db_conectar(),"SELECT f.folio, v.nombre, c.nombre, f.fecha, f.descuento, f.iva FROM folio_venta f, clients c, users v where f.client = c.id and f.vendedor = v.id and f.open = 1 and f.pedido = 0 and f.cotizacion = 0 and f.vendedor = $_SESSION[users_id] ");
+    $sales_open2 = mysqli_query(db_conectar(),"SELECT f.folio, v.nombre, c.nombre, f.fecha, f.descuento, f.iva FROM folio_venta f, clients c, users v where f.client = c.id and f.vendedor = v.id and f.open = 1 and f.pedido = 0 and f.cotizacion = 0 and f.vendedor = $_SESSION[users_id] ");
 ?>
 
 <!doctype html>
-<html class="no-js" lang="zxx">
+<html class="no-js" lang="es">
 
 <style>
     /* The container */
@@ -98,14 +99,55 @@
         background: url(images/_loader.gif) no-repeat center 0;
         margin:-50px 0 0 -50px;
     }
-    </style>
+    @media 
+    only screen and (max-width: 760px),
+    (min-device-width: 768px) and (max-device-width: 1024px)  {
+
+	/* Force table to not be like tables anymore */
+	table, thead, tbody, th, td, tr { 
+		display: block; 
+	}
+	
+	/* Hide table headers (but not display: none;, for accessibility) */
+	thead tr { 
+		position: absolute;
+		top: -9999px;
+		left: -9999px;
+	}
+	
+	tr { border: 1px solid #ccc; }
+	
+	td { 
+		/* Behave  like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee; 
+		position: relative;
+		padding-left: 50%; 
+	}
+	
+	td:before { 
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 45%; 
+		padding-right: 10px; 
+		white-space: nowrap;
+	}
+	
+	/*
+	Label the data
+	td:nth-of-type(2):before { display:none; }
+	*/
+</style>
     
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title><?php echo $_SESSION['empresa_nombre'] ?></title>
     <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
@@ -127,9 +169,14 @@
     <!-- Style customizer (Remove these two lines please) -->
     <link rel="stylesheet" href="css/color/skin-default.css">
 
-
     <!-- Modernizr JS -->
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+
+    <!-- CK Editor -->
+    <script src="https://cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
+
+    <!-- jquery latest version -->
+    <script src="js/vendor/jquery-3.1.1.min.js"></script>
 </head>
 
 <body>
@@ -138,7 +185,7 @@
     </div>
     <div id="main">
     <!--[if lt IE 8]>
-        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     <!-- Body main wrapper start -->
@@ -149,33 +196,22 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-4">
-                            <div class="header-top">
+                        <div class="header-top">
                                 <ul>
-                                <li class="lh-50">
-                                    <form action="products.php" autocomplete="off">
-                                        <input type="text" placeholder="Buscar" name="search" autocomplete="off">
-                                    </form>
-                                </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 hidden-sm hidden-xs">
-                            <div class="middle text-center">
-                                <ul>
-                                    <li class="mr-30 lh-50">
-                                    <a href="/products.php?pagina=1">
-                                        <strong><i class="zmdi zmdi-store"></i></strong> <?php echo $_SESSION['empresa_nombre'];?>
-                                    </a>    
+                                    <li class="lh-50">
+                                        <a href="#" class="pr-20"><i class="zmdi zmdi-search"></i></a>
+                                        <div class="header-bottom-search header-top-down header-top-hover lh-35">
+                                            <form action="products.php" class="header-search-box" action="index.php">
+                                                <div>
+                                                    <input type="text" placeholder="Buscar" name="search" autocomplete="off">
+                                                    <button class="btn btn-search" type="submit">
+                                                        <i class="zmdi zmdi-search"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-4">
-                            <div class="header-top header-top-right">
-                                <ul>
-                                <li class="lh-50">
+                                    <li class="lh-50">
                                         <a href="#" class="prl-20 text-uppercase">DEPARTAMENTOS</a>
                                         <div class="header-top-down header-top-hover header-top-down-lang pl-15 lh-35 lh-35">
                                             <ul>
@@ -188,6 +224,25 @@
                                             </ul>
                                         </div>
                                     </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 hidden-sm hidden-xs">
+                            <div class="middle text-center">
+                                <ul>
+                                    <li class="mr-30 lh-50">
+                                    <a href="/dashboard.php?desde=<?php echo date("Y-m-d"); ?>&hasta=<?php echo date("Y-m-d"); ?>&user=<?php echo $_SESSION['users_id'];?>">
+                                        <strong><i class="zmdi zmdi-store"></i></strong> <?php echo $_SESSION['empresa_nombre'];?>
+                                    </a>    
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="header-top header-top-right">
+                                <ul>
                                     <li class="lh-50">
                                         <a href="#" class="prl-20 text-uppercase">ALMACENES</a>
                                         <div class="header-top-down header-top-hover header-top-down-lang pl-15 lh-35 lh-35">
@@ -219,9 +274,7 @@
                                 <div class="col-md-12">
                                     <nav id="primary-menu">
                                         <ul class="main-menu text-center">
-                                            <li class="mega-parent"><a href="#"><i class="zmdi zmdi-plus"></i> Lo mas nuevo</a>
                                                 <div class="mega-menu-area header-top-hover p-30">
-
                                                 <?php
                                                     while($row = mysqli_fetch_array($departamentos_))
                                                     {
@@ -237,7 +290,7 @@
 
                                                 </div>
                                             </li>
-                                            <li><a href="#">Productos</a>
+                                            <li><a href="/products.php?pagina=1">Productos ▼</a>
                                                 <ul class="dropdown header-top-hover ptb-10">
                                                     <?php 
                                                         if ($_SESSION['product_add'] == 1)
@@ -247,10 +300,17 @@
                                                         if ($_SESSION['product_gest'] == 1)
                                                         {
                                                             echo '<li><a href="products.php?pagina=1">Gestionar</a></li>';
+                                                            echo '<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
+                                                            echo '<li><a href="" data-toggle="modal" data-target="#GenOneCodeBar">Imprimir Un Codigo </a></li>';
+                                                            echo '<li><a href="" data-toggle="modal" data-target="#GenMulCodeBar">Imprimir Multiples Codigos </a></li>';
+                                                            echo '<li><a href="/func/gen_full_codebar.php">Imprimir Todos Los Codigos </a></li>';
+                                                            echo '<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
                                                         }
                                                         if ($_SESSION['gen_orden_compra'] == 1)
                                                         {
-                                                            echo '<li><a href="g_compra.php?almacen=&marca=&proveedor=">G. Orden de compra</a></li>';
+                                                            echo '<li><a href="g_compra.php?almacen=&marca=&proveedor=">Nueva Orden De Compra</a></li>';
+                                                            echo '<li><a href="ordens_compra.php?pagina=1">Gestionar Orden De Compra</a></li>';
+                                                            echo '<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
                                                         }
                                                         if ($_SESSION['product_gest'] == 1)
                                                         {
@@ -266,37 +326,36 @@
                                                 </ul>
                                             </li>
 
-                                            <li><a href="clients.php?pagina=1">Clientes</a>
+                                            <li><a href="#">Contactos ▼</a>
                                                 <ul class="dropdown header-top-hover ptb-10">
                                                     <?php
-                                                    if ($_SESSION['client_add'] == 1)
-                                                    {
-                                                        echo '<li><a href="client_add.php">Agregar</a></li>';
-                                                    }
                                                     if ($_SESSION['client_guest'] == 1)
                                                     {
-                                                        echo '<li><a href="clients.php?pagina=1">Gestionar</a></li>';
+                                                        if ($_SESSION['client_add'] == 1)
+                                                        {
+                                                            $add_client = '
+                                                            <li>
+                                                                <a href="#" title="Agregar cliente" data-toggle="modal" data-target="#addclient">
+                                                                    Agregar cliente
+                                                                </a>
+                                                            </li>
+                                                            ';
+                                                        }
+                                                        echo '
+                                                                '.$add_client.'
+                                                                <li><a href="clients.php?pagina=1">Gestionar Clientes</a></li>
+                                                                <li><a target="_blank" href="clients_pdf.php?pagina=1">Reporte clientes</a></li>
+                                                            ';
                                                     }
                                                     ?>
-                                                    <li>
-                                                      <a href="#" title="Agregar departamento" data-toggle="modal" data-target="#clients_search">
-                                                            Buscar
-                                                        </a>
-                                                      </li>
                                                 </ul>
+                                                
                                             </li>
-                                            <?php
-                                                if ($_SESSION['sucursal_gest'] == 1)
-                                                {
-                                                    echo '<li><a href="sucursales.php">Sucursales</a>';
-                                                }
-                                            ?>
-                                            
                                             <?php
                                                 if ($_SESSION['usuarios'] == 1)
                                                 {
                                                     echo '
-                                                        <li><a href="users.php">Usuarios</a>
+                                                        <li><a href="users.php">Usuarios ▼</a>
                                                             <ul class="dropdown header-top-hover ptb-10">
                                                                 <li><a href="#" data-toggle="modal" data-target="#user_add">Agregar</a></li>
                                                                 <li><a href="users.php">Gestionar</a></li>
@@ -306,7 +365,7 @@
                                                 }
                                             ?>
                                             
-                                            <li><a href="#">Empresa</a>
+                                            <li><a href="#">Empresa ▼</a>
                                                 <div class="mega-menu-area-2 header-top-hover p-30">
                                                   <ul class="single-mega-item">
                                                         <?php
@@ -404,6 +463,16 @@
                                                                 </a>
                                                                 </li>
                                                                 <li>
+                                                                <a href="/e_ventas.php" title="Estrategias de ventas">
+                                                                    Estrategias ventas
+                                                                </a>
+                                                                </li>
+                                                                <li>
+                                                                <a href="#" title="Ver detalles" data-toggle="modal" data-target="#Empresa_datos_cfdi">
+                                                                    Datos CFDI
+                                                                </a>
+                                                                </li>
+                                                                <li>
                                                                 <a href="#" title="Ver detalles" data-toggle="modal" data-target="#Empresa_Mision">
                                                                     Mision
                                                                 </a>
@@ -435,6 +504,11 @@
                                                                     <li>
                                                                     <a href="#" title="Ver detalles" data-toggle="modal" data-target="#Empresa_datos">
                                                                         Datos
+                                                                    </a>
+                                                                    </li>
+                                                                    <li>
+                                                                    <a href="#" title="Ver detalles" data-toggle="modal" data-target="#Empresa_datos_cfdi">
+                                                                        Datos CFDI
                                                                     </a>
                                                                     </li>
                                                                     <li>
@@ -484,20 +558,27 @@
                                                       <li>
                                                       <li><a href="create_cotizacion.php?pagina=1">Crear cotizacion</a></li>
                                                       <li><a href="cotizaciones.php">Ver cotizaciones</a></li>
-                                                      <li></li>
-                                                      <li></li>
+                                                      <li><a href="/func/create_sale_cot_xpress.php">Cotizacion Xpress</a></li>
                                                   </ul>
                                                   <ul class="single-mega-item">
                                                       <li><h2 class="mega-menu-title mb-15">Pedidos</h2></li>
                                                       <li>
                                                       <li><a href="create_order.php?pagina=1">Crear pedido</a></li>
                                                       <li><a href="orders.php">Ver pedidos</a></li>
-                                                      <li></li>
+                                                      <li><br></li>
                                                       <li></li>
                                                   </ul>
                                                   <ul class="single-mega-item">
-                                                      <br><li><h2 class="mega-menu-title mb-15">Ventas / Abiertas</h2></li>
-                                                      <li><a href="create_sale.php?pagina=1">Crear venta</a></li>
+                                                      <li><h2 class="mega-menu-title mb-15">Ventas / Abiertas</h2></li>
+                                                      <?php
+                                                          if ($_SESSION['vtd_pg'] == 1)
+                                                          {
+                                                                echo '
+                                                                <li><a href="create_sale.php?pagina=1">Crear venta</a></li>     
+                                                                ';
+                                                          }
+                                                      ?>
+                                                      <li><a href="/func/create_sale_xpress.php">Crear venta Xpress</a></li>
                                                       <?php
                                                         $modal_ventas = "";
                                                         while($row = mysqli_fetch_array($sales_open))
@@ -610,12 +691,79 @@
                                                   </ul>
                                                 </div>
                                             </li>
-                                            <li><a href="facturas.php?pagina=1">Facturas</a>
+                                            <?php
+                                            if ($_SESSION['finanzas'] == 1)
+                                            {
+                                                echo '
+                                                <li><a href="credits.php?client=0">Creditos ▼</a>
+                                                    <ul class="dropdown header-top-hover ptb-10">
+                                                        <li>
+                                                            <a href="#" title="Agregar credito" data-toggle="modal" data-target="#addcredit">
+                                                                Agregar
+                                                            </a>
+                                                        </li>
+                                                        <li><a href="credits.php?client=0&sucursal=0">Gestionar</a></li>
+                                                    </ul>
+                                                </li> 
+                                                ';
+                                            }
+                                            ?>
+                                            <li><a href="credits.php?client=0">Mas ▼</a>
+                                                <ul class="dropdown header-top-hover ptb-10">
+                                                    <?php
+                                                        if ($_SESSION['sucursal_gest'] == 1)
+                                                        {
+                                                            echo '<li><a href="sucursales.php">Sucursales</a>';
+                                                        }
+                                                    ?>
+                                                    
+                                                    <?php
+                                                        if ($_SESSION['facturar'] == 1)
+                                                        {
+                                                            echo '
+                                                            <hr style="margin-top: 0em; margin-bottom: 0.9em;">
+                                                            <li><a href="/pendiente_facturas.php">Nuevas Facturas</a>
+                                                            <li><a href="/facturas.php?pagina=1">Facturas</a>
+                                                            ';
+                                                        }
+                                                    ?>
+                                                    <hr style="margin-top: 0em; margin-bottom: 0.9em;">
+                                                    <?php
+                                                        if ($_SESSION['traspasos'] == 1)
+                                                        {
+                                                            echo '
+                                                                <li><a href="/transfers.php?pagina=1">Traspasos</a>
+                                                                <li><a href="/func/create_transfer.php">Nuevo Traspaso</a>
+																<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
+                                                        }
+                                                    ?>
+                                                    
+                                                    <?php
+
+														//if ($_SESSION['traspasos'] == 1)
+
+                                                        //{
+                                                        //}
+
+                                                    ?>
+                                                </ul>
+                                            </li> 
+                                            
                                             <?php 
                                                 if ($_SESSION['caja'] == 1)
                                                 {
                                                     $items = '
-                                                        <li><a href="view_move.php?usuario=0&sucursal=0&t_pago=0">Visualizar</a></li>
+                                                        <li><a href="#" data-toggle="modal" data-target="#profile">Perfil</a></li>
+                                                        <hr style="margin-top: 0em; margin-bottom: 0.9em;">
+
+                                                        <li><a href="view_move.php?usuario=0&sucursal=0">Corte de caja</a></li>
+                                                        <li><a href="/func/cut_x_global.php">Corte X Global</a></li>
+                                                        <hr style="margin-top: 0em; margin-bottom: 0.9em;">
+
+                                                        <li><a href="/func/cut_x_view.php">Corte X</a></li>
+                                                        <li><a href="#" data-toggle="modal" data-target="#cut_z_yes_user">Corte Z</a></li>
+
+                                                        <hr style="margin-top: 0em; margin-bottom: 0.9em;">
                                                         <li><a href="#" data-toggle="modal" data-target="#ingreso">Registrar ingreso</a></li>
                                                         <li><a href="#" data-toggle="modal" data-target="#egreso">Registrar egreso</a></li>
                                                     ';
@@ -644,9 +792,15 @@
                                                         border-radius: 50%;
                                                         background-size: 100% auto;
                                                         "> '.$_SESSION['users_username'].' ▼ </a><ul class="dropdown header-top-hover ptb-10">
-                                                                <li><a href="#" data-toggle="modal" data-target="#profile">Perfil</a></li>
-                                                                <li><a href="sale_cut_x.php">Corte x</a></li>
-                                                                <li><a href="#" data-toggle="modal" data-target="#cut_z_yes">Corte Z</a></li>
+                                                            <li><a href="#" data-toggle="modal" data-target="#profile">Perfil</a></li>
+                                                            <hr style="margin-top: 0em; margin-bottom: 0.9em;">
+
+                                                            <li><a href="/func/cut_x_view.php">Corte X</a></li>
+                                                            <li><a href="#" data-toggle="modal" data-target="#cut_z_yes_user">Corte Z</a></li>
+                                                            <hr style="margin-top: 0em; margin-bottom: 0.9em;">
+                                                            
+                                                            <li><a href="#" data-toggle="modal" data-target="#ingreso">Registrar ingreso</a></li>
+                                                            <li><a href="#" data-toggle="modal" data-target="#egreso">Registrar egreso</a></li>
                                                             </ul>
                                                         </li>
                                                     ';
@@ -662,25 +816,48 @@
             </div>
             <!-- Mobile Menu Start -->
             <div class="mobile-menu-area">
-                <div class="container">
+                <div class="container" style="width:100%; !important">
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12">
                             <div class="mobile-menu">
                                 <nav id="dropdown">
                                     <ul>
+                                        <li><a href="/dashboard.php?desde=<?php echo date("Y-m-d"); ?>&hasta=<?php echo date("Y-m-d"); ?>&user=<?php echo $_SESSION['users_id'];?>">Dashboard</a></li>
                                         <li><a href="/products.php?pagina=1">Productos</a></li>
-                                        <li><a href="/clients.php?pagina=1">Clientes</a>
+                                        
+                                        <li><a href="#">Contactos </a>
+                                            <ul>
+                                                                                                <?php
+                                                    if ($_SESSION['client_guest'] == 1)
+                                                    {
+                                                        if ($_SESSION['client_add'] == 1)
+                                                        {
+                                                            $add_client = '
+                                                            <li>
+                                                                <a href="#" title="Agregar cliente" data-toggle="modal" data-target="#addclient" onclick="hideMenuVarMobile()">
+                                                                    Agregar cliente
+                                                                </a>
+                                                            </li>
+                                                            ';
+                                                        }
+                                                    
+                                                        echo '
+                                                                <li></li>
+                                                                '.$add_client.'
+                                                                <li><a href="clients.php?pagina=1">Gestionar Clientes</a></li>
+                                                                <li><a target="_blank" href="clients_pdf.php?pagina=1">Reporte clientes</a></li>
+                                                            ';
+                                                    }
+                                                    ?>
+
+                                            </ul>
+                                        </li>
+                                        <li><a href="cotizaciones.php">Cotizaciones</a>
                                             <ul>
                                             <?php
-                                                if ($_SESSION['client_add'] == 1)
-                                                {
-                                                    echo '<li><a href="client_add.php">Agregar</a></li>';
-                                                }
-                                                if ($_SESSION['client_guest'] == 1)
-                                                {
-                                                    echo '<li><a href="clients.php?pagina=1">Gestionar</a></li>';
-                                                }
+                                            echo '<li><a href="create_cotizacion.php?pagina=1">Crear cotizacion</a></li>';
                                             ?>
+                                            <li><a href="cotizaciones.php">Ver cotizaciones</a></li>
                                             </ul>
                                         </li>
                                         <!-- Ventas abiertas moviles
@@ -717,18 +894,181 @@
                                                     <li><a href="#" data-toggle="modal" data-target="#cut_z_yes">Corte Z</a></li>
                                             </li>
                                         -->
+                                        <li><a href="/credits.php?client=0&sucursal=0.php">Creditos</a>
+                                            <ul>
+                                            <?php
+                                            echo '<li>
+                                                    <a href="#" title="Agregar credito" data-toggle="modal" data-target="#addcredit" onclick="hideMenuVarMobile()">
+                                                        Agregar
+                                                    </a>
+                                                </li>';
+                                            ?>
+                                            <li><a href="/credits.php?client=0&sucursal=0.php">Gestionar</a></li>
+                                            </ul>
+                                        </li>
+                                        <?php 
+                                            if ($_SESSION['caja'] == 1)
+                                            {
+                                                echo '
+                                                    <li><a href="#">Caja</a>
+                                                        <ul>
+                                                            <li><a href="view_move.php?usuario=0&sucursal=0">Corte de caja</a></li>
+                                                            <li><a href="/func/cut_x_global.php">Corte X Global</a></li>
+                                                            <li><a href="/func/cut_x_view.php">Corte X</a></li>
+                                                            <li><a href="#" data-toggle="modal" data-target="#cut_z_yes_user" onclick="hideMenuVarMobile()">Corte Z</a></li>
+        
+                                                            <li><a href="#" title="ingreso" data-toggle="modal" data-target="#ingreso" onclick="hideMenuVarMobile()">Registrar ingreso</a></li>
+                                                            <li><a href="#" title="egreso" data-toggle="modal" data-target="#egreso" onclick="hideMenuVarMobile()">Registrar egreso</a></li>
+                                                        </ul>
+                                                    </li>
+                                                ';
+                                            }else
+                                            {
+                                                echo '
+                                                    <li><a href="#">Caja</a>
+                                                        <ul>
+                                                            <li><a href="/func/cut_x_view.php">Corte X</a></li>
+                                                            <li><a href="#" data-toggle="modal" data-target="#cut_z_yes_user" onclick="hideMenuVarMobile()">Corte Z</a></li>
+                                                            <li><a href="#" title="ingreso" data-toggle="modal" data-target="#ingreso" onclick="hideMenuVarMobile()">Registrar ingreso</a></li>
+                                                            <li><a href="#" title="egreso" data-toggle="modal" data-target="#egreso" onclick="hideMenuVarMobile()">Registrar egreso</a></li>
+                                                        </ul>
+                                                    </li>
+                                                ';
+                                            }
+                                            echo '
+
+												<li><a href="#">Mas</a>
+
+													<ul>
+														<li><a href="#" data-toggle="modal" data-target="#profile" onclick="hideMenuVarMobile()">Perfil</a></li>
+														<li><a href="/pendiente_facturas.php">Nuevas Facturas</a></li>
+														<li><a href="/facturas.php?pagina=1">Facturas</a></li>
+														
+													</ul>
+
+												</li>
+
+											';
+                                        ?>                                        
                                         <?php
                                         $hoy = date("Y-m-d");
                                                                 
                                         echo '<li><a href="finance.php?inicio='.$hoy.'&finaliza='.$hoy.'&folio=&usuario=0&sucursal=0">Reporte de ventas</a></li>';
                                         ?>
-                                        <li><a href="facturas.php?pagina=1">Facturas</a>
-                                        <?php
-                                        if ($_SESSION['caja'] == 1)
-                                        {
-                                            echo '<li><a href="view_move.php?usuario=0&sucursal=0&t_pago=0">Caja</a>';
-                                        }
-                                        ?>
+                                        <li><a href="create_sale.php?pagina=1">Crear venta</a></li>
+                                        <li><a href="/func/create_sale_xpress.php">Crear venta Xpress</a></li>
+                                        <li><a href="/func/create_sale_cot_xpress.php">Cotizacion Xpress</a></li>
+                                        <li><a href="#" title="ingreso" data-toggle="modal" data-target="#ingreso" onclick="hideMenuVarMobile()">Registrar ingreso</a></li>
+                                        <li><a href="#" title="egreso" data-toggle="modal" data-target="#egreso" onclick="hideMenuVarMobile()">Registrar egreso</a></li>
+                                                      <?php
+                                                        $modal_ventas = "";
+                                                        while($row = mysqli_fetch_array($sales_open2))
+                                                        {
+                                                            $ventas_movil = $ventas_movil . '<li><a href="sale_finaly.php?folio='.$row[0].'" title="FOLIO: '.$row[0].'" data-toggle="modal" data-target="#'.$row[0].'" >'.$row[2].'</a></li>';
+                                                            $ventas_movil_cotizar = $ventas_movil_cotizar . '<li><a href="sale_cotizacion.php?folio='.$row[0].'" title="FOLIO: '.$row[0].'" data-toggle="modal" data-target="#'.$row[0].'" >'.$row[2].'</a></li>';
+                                                            $ventas_movil_add_product = $ventas_movil_add_product . '<li><a href="sale.php?folio='.$row[0].'&pagina=1" title="FOLIO: '.$row[0].'" data-toggle="modal" data-target="#'.$row[0].'" >'.$row[2].'</a></li>';
+
+                                                            $modal_ventas = $modal_ventas . '
+                                                            <div class="modal fade" id="'.$row[0].'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="exampleModalLabel">VENTA ABIERTA</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>FOLIO: '.$row[0].'</p>
+                                                                    <p>CLIENTE: '.$row[2].'</p>
+                                                                    
+                                                                    <div class="col-md-12">
+                                                                        <form action="func/product_sale_update_descuento.php" method="post">
+                                                                            <input type="hidden" id="folio" name="folio" value="'.$row[0].'">
+                                                                            <input type="hidden" id="url" name="url" value="'.$_SERVER['REQUEST_URI'].'">
+                                                                            
+                                                                            <div class="col-md-12">
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <p>DESCUENTO:</p>
+                                                                            </div>
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <input type="number" id="descuento" name="descuento" autocomplete="off" value="'.$row[4].'" min="0" max="100" style="text-align:center;">
+                                                                            </div>
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <p>%</p>
+                                                                            </div>
+
+                                                                            <div class="col-md-3">
+                                                                                
+                                                                            </div>
+                                                                            </div>
+
+
+                                                                            <div class="col-md-12">
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <p>IVA:</p>
+                                                                            </div>
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <input type="number" id="iva" name="iva" autocomplete="off" value="'.$row[5].'" min="0" max="100" style="text-align:center;">
+                                                                            </div>
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <p>%</p>
+                                                                            </div>
+
+                                                                            <div class="col-md-3">
+                                                                                
+                                                                            </div>
+                                                                            </div>
+
+
+                                                                            <div class="col-md-12">
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <p></p>
+                                                                            </div>
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                                <br><button class="submit-btn mt-2" type="submit">Actualizar</button>
+                                                                            </div>
+                                                                            
+                                                                            <div class="col-md-3">
+                                                                            </div>
+
+                                                                            <div class="col-md-3">
+                                                                                
+                                                                            </div>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                    
+                                                                    <p>VENDEDOR: '.$row[1].'</p>
+                                                                    <p>FECHA: '.$row[3].'</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    
+                                                                    <form action="func/delete_f_venta.php" autocomplete="off" method="post">
+                                                                        <a href="/sale.php?folio='.$row[0].'&pagina=1"><button type="button" class="btn btn-primary">Agregar productos</button></a>
+                                                                        <input type="hidden" id="folio" name="folio" value="'.$row[0].'">
+                                                                        <input type="hidden" id="url" name="url" value="'.$_SERVER['REQUEST_URI'].'">
+                                                                        <button type="sumbit" class="btn btn-danger">Eliminar</button>
+                                                                        <a href="/sale_finaly_normal.php?folio='.$row[0].'"><button type="button" class="btn btn-success">Remisionar</button></a>
+                                                                    </form>
+                                                                    
+                                                                </div>
+                                                                </div>
+                                                            </div>
+                                                            </div>';
+                                                            //echo '<li><a href="#" title="FOLIO: '.$row[0].'" data-toggle="modal" data-target="#'.$row[0].'" >'.$row[2].'</a></li>';
+                                                            echo '<li><a href="/sale.php?folio='.$row[0].'&pagina=1" title="FOLIO: '.$row[0].'">'.$row[2].'</a></li>';
+                                                            
+                                                        }
+                                                        ?>
                                     </ul>
                                 </nav>
                             </div>
@@ -744,7 +1084,7 @@
         <section id="page-content" class="page-wrapper">
             <!-- Start Banner Area -->
             <div class="banner-area section-padding">
-            <div class="container" style="width:99%; !important">
+                <div class="container" style="width:99%; !important">
                     <div class="row">
                     <div id="message"></div>
         <script>
@@ -755,4 +1095,4 @@
             });
             return vars;
           }
-        </script>
+        </script> 

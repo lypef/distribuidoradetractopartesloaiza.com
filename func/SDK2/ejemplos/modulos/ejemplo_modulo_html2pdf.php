@@ -3,7 +3,6 @@ error_reporting(0); // OPCIONAL DESACTIVA NOTIFICACIONES DE DEBUG
 date_default_timezone_set('America/Mexico_City');
 
 include_once "../../sdk2.php";
-
 $datosHTML['RESPUESTA_UTF8'] = "SI";
 $datosHTML['PAC']['usuario'] = "DEMO700101XXX";
 $datosHTML['PAC']['pass'] = "DEMO700101XXX";
@@ -13,7 +12,7 @@ $datosHTML['modulo']="cfdi2html";                                               
 $datosHTML['rutaxml']='../../timbrados/cfdi_ejemplo_factura.xml';    //RUTA DEL XML CFDI
 $datosHTML['titulo']="factura ejemplo";                                          //TITULO DE FACTURA
 $datosHTML['tipo']="FACTURA";                                                    //TIPO DE FACTURA VENTA,NOMINA,ARRENDAMIENTO, ETC
-$datosHTML['path_logo']="timbrados/LOGOAEDESADECV.jpg";                          //RUTA DE LOGOTIPO DE FACTURA
+$datosHTML['path_logo']="timbrados/logo-grande.png";                          //RUTA DE LOGOTIPO DE FACTURA
 $datosHTML['notas']="una nota mas y masa";                                       //NOTA IMPRESA EN FACTURA
 $datosHTML['color_marco']="#013ADF";                                             //COLOR DEL MARCO DE LA FACTURA
 $datosHTML['color_marco_texto']="#FFFFFF";                                       //COLOR DEL TEXTO DEL MARCO DE LA FACTURA

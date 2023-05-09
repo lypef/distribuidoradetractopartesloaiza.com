@@ -16,7 +16,6 @@ $datos['modulo'] = 'sdk2_hosting';
 $datos['PAC']['usuario'] = 'DEMO700101XXX';
 $datos['PAC']['pass'] = 'DEMO700101XXX';
 $datos['PAC']['produccion'] = 'NO';
-
 // Se ejecuta el SDK
 $res = mf_ejecuta_modulo($datos);
 

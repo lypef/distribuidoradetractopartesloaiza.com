@@ -9,9 +9,52 @@ function mf_init_util_alias()
 {
     // Globales a usar
     global $__mf_constantes__;
+    
+    // Se valida la version de CFDi
+    if($__mf_constantes__['__MF_VERSION_CFDI__'] == '4.0')
+    {
+        // Alias
+        $__mf_alias40__['factura']['version'] = 'Version';
+        $__mf_alias40__['factura']['serie'] = 'Serie';
+        $__mf_alias40__['factura']['folio'] = 'Folio';
+        $__mf_alias40__['factura']['fecha_expedicion'] = 'Fecha';
+        $__mf_alias40__['factura']['metodo_pago'] = 'MetodoPago';
+        $__mf_alias40__['factura']['forma_pago'] = 'FormaPago';
+        $__mf_alias40__['factura']['tipocomprobante'] = 'TipoDeComprobante';
+        $__mf_alias40__['factura']['moneda'] = 'Moneda';
+        $__mf_alias40__['factura']['tipocambio'] = 'TipoCambio';
+        $__mf_alias40__['factura']['subtotal'] = 'SubTotal';
+        $__mf_alias40__['factura']['total'] = 'Total';
+        $__mf_alias40__['factura']['descuento'] = 'Descuento';
+        $__mf_alias40__['factura']['noCertificado'] = 'NoCertificado';
+        $__mf_alias40__['factura']['certificado'] = 'Certificado';
+        $__mf_alias40__['factura']['sello'] = 'Sello';
+        $__mf_alias40__['factura']['condicionesDePago'] = 'CondicionesDePago';
+
+        $__mf_alias40__['emisor']['rfc'] = 'Rfc';
+        $__mf_alias40__['emisor']['nombre'] = 'Nombre';
+
+        $__mf_alias40__['receptor']['rfc'] = 'Rfc';
+        $__mf_alias40__['receptor']['nombre'] = 'Nombre';
+
+        $__mf_alias40__['conceptos']['ID'] = 'NoIdentificacion';
+        $__mf_alias40__['conceptos']['valorunitario'] = 'ValorUnitario';
+        $__mf_alias40__['conceptos']['cantidad'] = 'Cantidad';
+        $__mf_alias40__['conceptos']['unidad'] = 'Unidad';
+        $__mf_alias40__['conceptos']['descripcion'] = 'Descripcion';
+        $__mf_alias40__['conceptos']['importe'] = 'Importe';
+
+        $__mf_alias40__['impuestos']['translados']['importe'] = 'Importe';
+        $__mf_alias40__['impuestos']['translados']['tasa'] = 'TasaOCuota';
+        $__mf_alias40__['impuestos']['translados']['impuesto'] = 'Impuesto';
+
+        $__mf_alias40__['impuestos']['retenciones']['impuesto'] = 'Impuesto';
+        $__mf_alias40__['impuestos']['retenciones']['importe'] = 'Importe';
+        mf_agrega_alias($__mf_alias40__);
+    }
 
     // Se valida la version de CFDi
-    if($__mf_constantes__['__MF_VERSION_CFDI__'] == '3.3')
+    if($__mf_constantes__['__MF_VERSION_CFDI__'] == '3.3' OR $__mf_constantes__['__MF_VERSION_CFDI__'] == '4.0')
     {
         // Alias
         $__mf_alias33__['factura']['version'] = 'Version';

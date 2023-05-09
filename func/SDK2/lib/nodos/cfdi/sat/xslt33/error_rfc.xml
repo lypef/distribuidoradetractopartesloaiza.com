@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cfdi:Comprobante xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:cfdi='http://www.sat.gob.mx/cfd/3' xmlns:cartaporte='http://www.sat.gob.mx/CartaPorte20' xsi:schemaLocation='http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd http://www.sat.gob.mx/CartaPorte20 http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte20.xsd ' Version='3.3' CondicionesDePago='CONTADOs' Fecha='2021-11-27T20:06:43' Folio='659155' FormaPago='04' LugarExpedicion='77734' MetodoPago='PUE' Moneda='MXN' Serie='A' SubTotal='215.51' TipoCambio='1' TipoDeComprobante='I' Total='249.99' Certificado='MIIFuzCCA6OgAwIBAgIUMzAwMDEwMDAwMDA0MDAwMDI0MzQwDQYJKoZIhvcNAQELBQAwggErMQ8wDQYDVQQDDAZBQyBVQVQxLjAsBgNVBAoMJVNFUlZJQ0lPIERFIEFETUlOSVNUUkFDSU9OIFRSSUJVVEFSSUExGjAYBgNVBAsMEVNBVC1JRVMgQXV0aG9yaXR5MSgwJgYJKoZIhvcNAQkBFhlvc2Nhci5tYXJ0aW5lekBzYXQuZ29iLm14MR0wGwYDVQQJDBQzcmEgY2VycmFkYSBkZSBjYWRpejEOMAwGA1UEEQwFMDYzNzAxCzAJBgNVBAYTAk1YMRkwFwYDVQQIDBBDSVVEQUQgREUgTUVYSUNPMREwDwYDVQQHDAhDT1lPQUNBTjERMA8GA1UELRMIMi41LjQuNDUxJTAjBgkqhkiG9w0BCQITFnJlc3BvbnNhYmxlOiBBQ0RNQS1TQVQwHhcNMTkwNjE3MTk0NDE0WhcNMjMwNjE3MTk0NDE0WjCB4jEnMCUGA1UEAxMeRVNDVUVMQSBLRU1QRVIgVVJHQVRFIFNBIERFIENWMScwJQYDVQQpEx5FU0NVRUxBIEtFTVBFUiBVUkdBVEUgU0EgREUgQ1YxJzAlBgNVBAoTHkVTQ1VFTEEgS0VNUEVSIFVSR0FURSBTQSBERSBDVjElMCMGA1UELRMcRUtVOTAwMzE3M0M5IC8gWElRQjg5MTExNlFFNDEeMBwGA1UEBRMVIC8gWElRQjg5MTExNk1HUk1aUjA1MR4wHAYDVQQLExVFc2N1ZWxhIEtlbXBlciBVcmdhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCN0peKpgfOL75iYRv1fqq+oVYsLPVUR/GibYmGKc9InHFy5lYF6OTYjnIIvmkOdRobbGlCUxORX/tLsl8Ya9gm6Yo7hHnODRBIDup3GISFzB/96R9K/MzYQOcscMIoBDARaycnLvy7FlMvO7/rlVnsSARxZRO8Kz8Zkksj2zpeYpjZIya/369+oGqQk1cTRkHo59JvJ4Tfbk/3iIyf4H/Ini9nBe9cYWo0MnKob7DDt/vsdi5tA8mMtA953LapNyCZIDCRQQlUGNgDqY9/8F5mUvVgkcczsIgGdvf9vMQPSf3jjCiKj7j6ucxl1+FwJWmbvgNmiaUR/0q4m2rm78lFAgMBAAGjHTAbMAwGA1UdEwEB/wQCMAAwCwYDVR0PBAQDAgbAMA0GCSqGSIb3DQEBCwUAA4ICAQBcpj1TjT4jiinIujIdAlFzE6kRwYJCnDG08zSp4kSnShjxADGEXH2chehKMV0FY7c4njA5eDGdA/G2OCTPvF5rpeCZP5Dw504RZkYDl2suRz+wa1sNBVpbnBJEK0fQcN3IftBwsgNFdFhUtCyw3lus1SSJbPxjLHS6FcZZ51YSeIfcNXOAuTqdimusaXq15GrSrCOkM6n2jfj2sMJYM2HXaXJ6rGTEgYmhYdwxWtil6RfZB+fGQ/H9I9WLnl4KTZUS6C9+NLHh4FPDhSk19fpS2S/56aqgFoGAkXAYt9Fy5ECaPcULIfJ1DEbsXKyRdCv3JY89+0MNkOdaDnsemS2o5Gl08zI4iYtt3L40gAZ60NPh31kVLnYNsmvfNxYyKp+AeJtDHyW9w7ftM0Hoi+BuRmcAQSKFV3pk8j51la+jrRBrAUv8blbRcQ5BiZUwJzHFEKIwTsRGoRyEx96sNnB03n6GTwjIGz92SmLdNl95r9rkvp+2m4S6q1lPuXaFg7DGBrXWC8iyqeWE2iobdwIIuXPTMVqQb12m1dAkJVRO5NdHnP/MpqOvOgLqoZBNHGyBg4Gqm4sCJHCxA1c8Elfa2RQTCk0tAzllL4vOnI1GHkGJn65xokGsaU4B4D36xh7eWrfj4/pgWHmtoDAYa8wzSwo2GVCZOs+mtEgOQB91/g==' NoCertificado='30001000000400002434' Sello='{SELLO}'>
+	<cfdi:CfdiRelacionados TipoRelacion='01'>
+		<cfdi:CfdiRelacionado UUID='A39DA66B-52CA-49E3-879B-5C05185B0EF7'/>
+	</cfdi:CfdiRelacionados>
+	<cfdi:Emisor Rfc='EKU9003173C9' Nombre='ACCEM S&amp;ERVICIOS EMPRESARIALES SC' RegimenFiscal='601'/>
+	<cfdi:Receptor Rfc='SOHM7509289MA' Nombre='Pu&amp;blico en General' UsoCFDI='G03'/>
+	<cfdi:Conceptos>
+		<cfdi:Concepto Cantidad='1' Unidad='PIEZA' NoIdentificacion='M7390Z' Descripcion='taxi' ValorUnitario='215.51' Importe='215.51' ClaveProdServ='53102700' ClaveUnidad='H87'>
+			<cfdi:Impuestos>
+				<cfdi:Traslados>
+					<cfdi:Traslado Base='215.51' Impuesto='002' TipoFactor='Tasa' TasaOCuota='0.160000' Importe='34.48'/>
+				</cfdi:Traslados>
+			</cfdi:Impuestos>
+		</cfdi:Concepto>
+	</cfdi:Conceptos>
+	<cfdi:Impuestos TotalImpuestosTrasladados='34.48'>
+		<cfdi:Traslados>
+			<cfdi:Traslado Impuesto='002' TasaOCuota='0.160000' Importe='34.48' TipoFactor='Tasa'/>
+		</cfdi:Traslados>
+	</cfdi:Impuestos>
+	<cfdi:Complemento>
+		<cartaporte20:CartaPorte Version='2.0' TranspInternac='AAAA' EntradaSalidaMerc='BBBB' PaisOrigenDestino='CCCC' ViaEntradaSalida='DDDD' TotalDistRec='EEEE'>
+			<cartaporte20:Ubicaciones>
+				<cartaporte20:Ubicacion TipoUbicacion='aaaa' TipoEstacion='bbb' RFCRemitenteDestinatario='ccc' ResidenciaFiscal='ddd' NumRegIdTrib='eeee' NumEstacion='fffff' NombreRemitenteDestinatario='gggg' NombreEstacion='hhhhh' NavegacionTrafico='iiiiii' IDUbicacion='jjjjj' FechaHoraSalidaLlegada='kkkkk' DistanciaRecorrida='llll'>
+					<cartaporte20:Domicilio Referencia='llll' Pais='2222' NumeroInterior='3333' NumeroExterior='4444' Municipio='5555' Localidad='6666' Estado='7777' Colonia='8888' CodigoPostal='9999' Calle='0000'/>
+				</cartaporte20:Ubicacion>
+				<cartaporte20:Ubicacion TipoUbicacion='aaaa' TipoEstacion='bbb' RFCRemitenteDestinatario='ccc' ResidenciaFiscal='ddd' NumRegIdTrib='eeee' NumEstacion='fffff' NombreRemitenteDestinatario='gggg' NombreEstacion='hhhhh' NavegacionTrafico='iiiiii' IDUbicacion='jjjjj' FechaHoraSalidaLlegada='kkkkk' DistanciaRecorrida='llll'>
+					<cartaporte20:Domicilio Referencia='llll' Pais='2222' NumeroInterior='3333' NumeroExterior='4444' Municipio='5555' Localidad='6666' Estado='7777' Colonia='8888' CodigoPostal='9999' Calle='0000'/>
+				</cartaporte20:Ubicacion>
+			</cartaporte20:Ubicaciones>
+			<cartaporte20:Mercancias PesoBrutoTotal='PesoBrutoTotalxxx' UnidadPeso='UnidadPeso' PesoNetoTotal='PesoNetoTotal' NumTotalMercancias='NumTotalMercancias' CargoPorTasacion='CargoPorTasacion'>
+				<cartaporte20:Mercancia ValorMercancia='ValorMercancia' UUIDComercioExt='UUIDComercioExt' Unidad='Unidad' PesoEnKg='PesoEnKg' Moneda='Moneda' MaterialPeligroso='MaterialPeligroso' FraccionArancelaria='FraccionArancelaria' Embalaje='Embalaje' Dimensiones='Dimensiones' DescripEmbalaje='DescripEmbalaje' Descripcion='Descripcion' CveMaterialPeligroso='CveMaterialPeligroso' ClaveUnidad='ClaveUnidad' ClaveSTCC='ClaveSTCC' Cantidad='Cantidad' BienesTransp='BienesTransp'>
+					<cartaporte20:Pedimentos Pedimento='00000000'/>
+					<cartaporte20:Pedimentos Pedimento='11111111'/>
+					<cartaporte20:Pedimentos Pedimento='22222222'/>
+					<cartaporte20:GuiasIdentificacion PesoGuiaIdentificacion='PesoGuiaIdentificacion' NumeroGuiaIdentificacion='NumeroGuiaIdentificacion' DescripGuiaIdentificacion='DescripGuiaIdentificacion'/>
+					<cartaporte20:GuiasIdentificacion PesoGuiaIdentificacion='1PesoGuiaIdentificacion' NumeroGuiaIdentificacion='1NumeroGuiaIdentificacion' DescripGuiaIdentificacion='1DescripGuiaIdentificacion'/>
+					<cartaporte20:CantidadTransporta IDOrigen='IDOrigen' IDDestino='IDDestino' CvesTransporte='CvesTransporte' Cantidad='Cantidad'/>
+					<cartaporte20:CantidadTransporta IDOrigen='2IDOrigen' IDDestino='2IDDestino' CvesTransporte='2CvesTransporte' Cantidad='2Cantidad'/>
+					<cartaporte20:DetalleMercancia UnidadPesoMerc='UnidadPesoMerc' c_ClaveUnidadPeso='c_ClaveUnidadPeso' PesoTara='PesoTara' PesoNeto='PesoNeto' PesoBruto='PesoBruto' NumPiezas='NumPiezas'/>
+					<cartaporte20:DetalleMercancia UnidadPesoMerc='2UnidadPesoMerc' c_ClaveUnidadPeso='2c_ClaveUnidadPeso' PesoTara='2PesoTara' PesoNeto='2PesoNeto' PesoBruto='2PesoBruto' NumPiezas='2NumPiezas'/>
+				</cartaporte20:Mercancia>
+				<cartaporte20:Autotransporte PermSCT='PermSCT' NumPermisoSCT='NumPermisoSCT'>
+					<cartaporte20:IdentificacionVehicular PlacaVM='PlacaVM' ConfigVehicular='ConfigVehicular' AnioModeloVM='AnioModeloVM'/>
+					<cartaporte20:Seguros PrimaSeguro='PrimaSeguro' PolizaRespCivil='PolizaRespCivil' PolizaMedAmbiente='PolizaMedAmbiente' PolizaCarga='PolizaCarga' AseguraRespCivil='AseguraRespCivil' AseguraMedAmbiente='AseguraMedAmbiente' AseguraCarga='AseguraCarga'/>
+					<cartaporte20:Remolques>
+						<cartaporte20:Remolque SubTipoRem='SubTipoRem' Placa='Placa'/>
+						<cartaporte20:Remolque SubTipoRem='2SubTipoRem' Placa='Placa'/>
+					</cartaporte20:Remolques>
+				</cartaporte20:Autotransporte>
+				<cartaporte20:TransporteMaritimo UnidadesDeArqBruto='UnidadesDeArqBruto' TipoEmbarcacion='TipoEmbarcacion' TipoCarga='TipoCarga' PermSCT='PermSCT' NumViaje='NumViaje' NumPolizaSeguro='NumPolizaSeguro' NumPermisoSCT='NumPermisoSCT' NumeroOMI='NumeroOMI' NumConocEmbarc='NumConocEmbarc' NumCertITC='NumCertITC' NumAutorizacionNaviero='NumAutorizacionNaviero' NombreEmbarc='NombreEmbarc' NombreAseg='NombreAseg' NombreAgenteNaviero='NombreAgenteNaviero' NacionalidadEmbarc='NacionalidadEmbarc' Matricula='Matricula' Manga='Manga' LineaNaviera='LineaNaviera' Eslora='Eslora' Calado='Calado' AnioEmbarcacion='AnioEmbarcacion'>
+					<cartaporte20:Contenedor TipoContenedor='TipoContenedor' NumPrecinto='NumPrecinto' MatriculaContenedor='MatriculaContenedor'/>
+					<cartaporte20:Contenedor TipoContenedor='2TipoContenedor' NumPrecinto='2NumPrecinto' MatriculaContenedor='2MatriculaContenedor'/>
+				</cartaporte20:TransporteMaritimo>
+				<cartaporte20:TransporteAereo RFCEmbarcador='RFCEmbarcador' ResidenciaFiscalEmbarc='ResidenciaFiscalEmbarc' PermSCT='PermSCT' NumRegIdTribEmbarc='NumRegIdTribEmbarc' NumPolizaSeguro='NumPolizaSeguro' NumPermisoSCT='NumPermisoSCT' NumeroGuia='NumeroGuia' NombreEmbarcador='NombreEmbarcador' NombreAseg='NombreAseg' MatriculaAeronave='MatriculaAeronave' LugarContrato='LugarContrato' CodigoTransportista='CodigoTransportista'/>
+				<cartaporte20:TransporteFerroviario TipoDeTrafico='TipoDeTrafico' TipoDeServicio='TipoDeServicio' NumPolizaSeguro='NumPolizaSeguro' NombreAseg='NombreAseg'>
+					<cartaporte20:DerechosDePaso TipoDerechoDePaso='TipoDerechoDePaso' KilometrajePagado='KilometrajePagado'/>
+					<cartaporte20:DerechosDePaso TipoDerechoDePaso='2TipoDerechoDePaso' KilometrajePagado='2KilometrajePagado'/>
+					<cartaporte20:Carro ToneladasNetasCarro='ToneladasNetasCarro' TipoCarro='TipoCarro' MatriculaCarro='MatriculaCarro' GuiaCarro='GuiaCarro'>
+						<cartaporte20:Contenedor TipoContenedor='TipoContenedor' PesoNetoMercancia='PesoNetoMercancia' PesoContenedorVacio='PesoContenedorVacio'/>
+						<cartaporte20:Contenedor TipoContenedor='2TipoContenedor' PesoNetoMercancia='2PesoNetoMercancia' PesoContenedorVacio='2PesoContenedorVacio'/>
+					</cartaporte20:Carro>
+				</cartaporte20:TransporteFerroviario>
+			</cartaporte20:Mercancias>
+			<cartaporte20:FiguraTransporte>
+				<cartaporte20:TiposFigura TipoFigura='TipoFigura' RFCFigura='RFCFigura' ResidenciaFiscalFigura='ResidenciaFiscalFigura' NumRegIdTribFigura='NumRegIdTribFigura' NumLicencia='NumLicencia' NombreFigura='NombreFigura'>
+					<cartaporte20:PartesTransporte ParteTransporte='ParteTransporte'>
+						<cartaporte20:Domicilio Referencia='Referencia' Pais='Pais' NumeroInterior='NumeroInterior' NumeroExterior='NumeroExterior' Municipio='Municipio' Localidad='Localidad' Estado='Estado' Colonia='Colonia' CodigoPostal='CodigoPostal' Calle='Calle'/>
+					</cartaporte20:PartesTransporte>
+				</cartaporte20:TiposFigura>
+			</cartaporte20:FiguraTransporte>
+		</cartaporte20:CartaPorte>
+	</cfdi:Complemento>
+</cfdi:Comprobante>

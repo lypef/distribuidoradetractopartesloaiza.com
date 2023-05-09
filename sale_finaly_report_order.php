@@ -1,6 +1,12 @@
 <?php
     require_once 'func/db.php';
-    require_once("dompdf/dompdf_config.inc.php");
+    // Dompdf php 7
+    //require_once 'dompdf_php7.1/autoload.inc.php';
+    //use Dompdf\Dompdf;
+
+    // Dompdf php 5
+    require_once("dompdf_php5.6/dompdf_config.inc.php");
+    
     $folio = $_GET["folio"];
     session_start();
 
@@ -22,7 +28,8 @@
         $tel = $row[8];
         $iva = $row[9];
         $folio_uno = $row[10];
-        $bodysucursal = $row[12] . '<br>TELEFONO:' . $row[13];
+        $bodysucursal = $row[12] . '
+        <br><span style="font-size: 14px;">RESPONSABLE: ' . $vendedor . '</span>';
     }
 
     $codigoHTML='
@@ -38,12 +45,14 @@
     <table width="100%" border="0">
         <tr>
             <td width="35%">
-                <img src="images/membrete.png" alt="Membrete" height="auto" width="350">
+                <img src="'.ReturnImgLogo().'" alt="Membrete" height="auto" width="350">
             </td>
 
             <td>
-                <h3><center>SUC. '.$sucursal.'</center></h3>
-                <p><center>'.$bodysucursal.'</p>
+                <center>
+                <h2 style="display:inline;">'.$sucursal.'</h2>
+                <br>'.$bodysucursal.'
+                </center>
             </td>
         </tr>
     </table>
@@ -62,8 +71,8 @@
         </tr>
     </table>
     <br><hr>
-    <p>ABONO: $ '.number_format($cobrado,2,".",",").' MXN | '.numtoletras($cobrado).'</p>
-    <p>RECIBIMOS LA CANTIDAD DE : $ '.number_format($cobrado,2,".",",").' MXN ('.numtoletras($cobrado).') EN CALIDAD DE ABONO POR CONCEPTO DE EL PEDIDO CON FOLIO: '.$folio.'</p>';
+    <p>ABONO: $ '.number_format($cobrado,GetNumberDecimales(),".",",").' MXN | '.numtoletras($cobrado).'</p>
+    <p>RECIBIMOS LA CANTIDAD DE : $ '.number_format($cobrado,GetNumberDecimales(),".",",").' MXN ('.numtoletras($cobrado).') EN CALIDAD DE ABONO POR CONCEPTO DE EL PEDIDO CON FOLIO: '.$folio.'</p>';
     
     $codigoHTML .= FooterPageReport();
     

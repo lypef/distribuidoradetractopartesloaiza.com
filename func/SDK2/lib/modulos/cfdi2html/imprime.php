@@ -331,7 +331,7 @@ function imprime_factura($xml_archivo,$titulo,$tipo_factura,$logo,$nota_impresa)
         $version= $cfdiComprobante['version'];  //3.2
        
         if($version =='')
-            $version= $cfdiComprobante['Version'];  //3.3
+            $version= $cfdiComprobante['Version'];  //4.0
         
         if($version =='')    
                 echo "xml no valido";
@@ -378,7 +378,7 @@ function imprime_factura($xml_archivo,$titulo,$tipo_factura,$logo,$nota_impresa)
               ";  
             }
         }
-        if($version=="3.3")
+        if($version=="4.0")
         {
             $fecha_expedicion= $cfdiComprobante['Fecha'];
             //TODO: aki etiketa de cuenta en cheke
@@ -434,7 +434,7 @@ function imprime_factura($xml_archivo,$titulo,$tipo_factura,$logo,$nota_impresa)
             $emisor_rfc=$Emisor['rfc'];
             $emisor_nombre= autoformato_impresion($Emisor['nombre']);
         }
-        if($version=='3.3')
+        if($version=='4.0')
         {
             $emisor_rfc=$Emisor['Rfc'];
             $emisor_nombre= autoformato_impresion($Emisor['Nombre']);
@@ -481,10 +481,12 @@ function imprime_factura($xml_archivo,$titulo,$tipo_factura,$logo,$nota_impresa)
             $receptor_rfc=$Receptor['rfc'];
             $receptor_nombre=autoformato_impresion($Receptor['nombre']);
         }
-        if($version=='3.3'){   
+        if($version=='4.0'){   
             $receptor_rfc=$Receptor['Rfc'];
             $receptor_nombre=autoformato_impresion($Receptor['Nombre']);
             $uso_CFDi=$Receptor['UsoCFDI'];
+            $receptor_cp=$Receptor['DomicilioFiscalReceptor'];
+            $receptor_rf=$Receptor['RegimenFiscalReceptor'];
         }
     }
     //3.2
@@ -516,16 +518,16 @@ function imprime_factura($xml_archivo,$titulo,$tipo_factura,$logo,$nota_impresa)
         
         ';
     }
-    if($version=='3.3'){
+    if($version=='4.0'){
         $desgloce='<table width="100%">
            <tr class="factura_detalles_cabecera" style="font-size: 13px;  font-weight: bold;">
-           <td width="44px" align="center">CveProdServ</td>
-           <td width="44px" align="center">NoParte</td>
+           <td width="44px" align="center">CLAVE</td>
+           <td width="44px" align="center">ID</td>
            <td width="44px" align="center">CNT</td>
-            <td width="44px align="center"">CveUnidad</td>
+            <td width="44px align="center"">CVEUNIDAD</td>
             <td  width="75px" align="center">UNIDAD</td>
             <td width="auto">PRODUCTO</td>
-            <td   width="100px" align="right">PRECIO UNITARIO</td>
+            <td   width="100px" align="right">PUNITARIO</td>
             <td   width="100px"  align="right">IMPORTE</td>
            </tr>
         
@@ -594,7 +596,7 @@ function imprime_factura($xml_archivo,$titulo,$tipo_factura,$logo,$nota_impresa)
                 </tr>
                 ";
         }
-        if($version=='3.3')
+        if($version=='4.0')
         {  
             $CveProdServ=$Concepto['ClaveProdServ'];
             $CveUnidad=$Concepto['ClaveUnidad'];
@@ -680,7 +682,7 @@ $iva_retenido=0.00;
             $timbre_version= $tfd['version'];
             $timbre_selloSAT = $sellosat=$tfd['selloSAT'];
         }
-        if($version=='3.3')
+        if($version=='4.0')
         {
             $timbre_selloCFD= $tfd['SelloCFD'];
             $timbre_fecha= $tfd['FechaTimbrado'];
@@ -695,19 +697,7 @@ $iva_retenido=0.00;
     $total_translados=$total_translados_locales=0;
     foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Impuestos//cfdi:Traslados//cfdi:Traslado') as $Traslado)
     {
-        if($version=='3.2')
-        {
-            $tasa=$Traslado['tasa'];
-            $importe=$Traslado['importe'];
-            $importe_=number_format((string)$importe,2);
-            $impuesto= $Traslado['impuesto'];
-            $total_translados=$total_translados+(float)$importe;
-            $iva_txt.="
-                    $impuesto ($tasa%) $ $importe_ 
-                        
-            ";
-        }
-        if($version=='3.3')
+        if($version=='4.0')
         {
             $Base=$Traslado['Base'];         //COMPARA SI ES IMPUESTO DE PRODUCTO O DE COMPROBANTE
             $tasa=$Traslado['TasaOCuota'];
@@ -716,11 +706,63 @@ $iva_retenido=0.00;
             $impuesto= $Traslado['Impuesto'];
             $impuesto_txt=formato_impuestos($impuesto);
             $TipoFactor= $Traslado['TipoFactor'];
-            if($Base =='')
-            {
+            
+            //if($Base =='')
+            //{
                 $total_translados=$total_translados+(float)$importe;
-                $iva_txt.="
-                        $impuesto_txt ($tasa%)  $Base $ $importe_
+                $iva_txt ="<b> $impuesto_txt </b> ($tasa%):";
+                $iva_txt .=" $ "."$importe_";
+                
+            //}
+        }
+    }
+    // INFO GLOBAL
+    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:InformacionGlobal') as $i_global)
+    {
+        if($version=='4.0')
+        {
+            $PeriodicidadGet= $i_global['Periodicidad'];
+            $MesGet= $i_global['Meses'];
+
+            if ($PeriodicidadGet == "01") {$Periodicidad = "Diario";}
+            if ($PeriodicidadGet == "02") {$Periodicidad = "Semanal";}
+            if ($PeriodicidadGet == "03") {$Periodicidad = "Quincenal";}
+            if ($PeriodicidadGet == "04") {$Periodicidad = "Mensual";}
+            if ($PeriodicidadGet == "05") {$Periodicidad = "Bimestral";}
+
+            if ($MesGet == "01") {$mes = "Enero";}
+            if ($MesGet == "02") {$mes = "Febrero";}
+            if ($MesGet == "03") {$mes = "Marzo";}
+            if ($MesGet == "04") {$mes = "Abril";}
+            if ($MesGet == "05") {$mes = "Mayo";}
+            if ($MesGet == "06") {$mes = "Junio";}
+            if ($MesGet == "07") {$mes = "Julio";}
+            if ($MesGet == "08") {$mes = "Agosto";}
+            if ($MesGet == "09") {$mes = "Septiembre";}
+            if ($MesGet == "10") {$mes = "Octubre";}
+            if ($MesGet == "11") {$mes = "Noviembre";}
+            if ($MesGet == "12") {$mes = "Diciembre";}
+            
+            if ( $MesGet == "13") {$mes = "Enero-Febrero";}
+            if ( $MesGet == "14") {$mes = "Marzo-Abril";}
+            if ( $MesGet == "15") {$mes = "Mayo-Junio";}
+            if ( $MesGet == "16") {$mes = "Julio-Agosto";}
+            if ( $MesGet == "17") {$mes = "Septiembre-Octubre";}
+            if ( $MesGet == "18") {$mes = "Noviembre-Diciembre";}
+            
+            $year = $i_global['Año'];
+
+            $Periodicidad = strtoupper($Periodicidad);
+            $mes = strtoupper($mes);
+
+            if (!empty($year))
+            {
+                $info_global = "
+                <tr>
+                    <td><center><b>PERIODICIDAD:</b> $Periodicidad</center></td>
+                    <td><center><b>MES:</b> $mes</center></td>
+                    <td><center><b>A&Ntilde;O:</b> $year</center></td>
+                </tr>
                 ";
             }
         }
@@ -817,7 +859,7 @@ $iva_retenido=0.00;
                             </tr>
             ";
         }
-        if($version=='3.3')
+        if($version=='4.0')
         {
             $Base=$Retencion['Base'];
             $importe=$Retencion['Importe'];
@@ -1860,14 +1902,37 @@ if($version=='3.2')
     </div>
     ";
 }
-if($version=='3.3')
+if($version=='4.0')
 {
-    $Emisor="
-    <div class='factura_emisor factura_cuadro'>
-        <div class='factura_titulo_ch'><b>EMISOR:</b></div>
-        <div class='factura_titulo_empresa'>$emisor_nombre </div>
-        <div> RFC: $emisor_rfc</div>
+    $regimen = "";
+
+    if ($regimen_fiscal == 601) {$regimen = "General de Ley Personas Morales";}
+    if ($regimen_fiscal == 603) {$regimen = "Personas Morales con Fines no Lucrativos";}
+    if ($regimen_fiscal == 605) {$regimen = "Sueldos y Salarios e Ingresos Asimilados a Salarios";}
+    if ($regimen_fiscal == 606) {$regimen = "Arrendamiento";}
+    if ($regimen_fiscal == 607) {$regimen = "Regimen de Enajenacion o Adquisicion de Bienes";}
+    if ($regimen_fiscal == 608) {$regimen = "Demás ingresos";}
+    if ($regimen_fiscal == 610) {$regimen = "Residentes en el Extranjero sin Establecimiento Permanente en Mexico";}
+    if ($regimen_fiscal == 611) {$regimen = "Ingresos por Dividendos (socios y accionistas)";}
+    if ($regimen_fiscal == 612) {$regimen = "Personas Físicas con Actividades Empresariales y Profesionales";}
+    if ($regimen_fiscal == 614) {$regimen = "Ingresos por intereses";}
+    if ($regimen_fiscal == 615) {$regimen = "Regimen de los ingresos por obtencion de premios";}
+    if ($regimen_fiscal == 616) {$regimen = "Sin obligaciones fiscales";}
+    if ($regimen_fiscal == 620) {$regimen = "Sociedades Cooperativas de Produccion que optan por diferir sus ingresos";}
+    if ($regimen_fiscal == 621) {$regimen = "Incorporacion Fiscal";}
+    if ($regimen_fiscal == 622) {$regimen = "Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras";}
+    if ($regimen_fiscal == 623) {$regimen = "Opcional para Grupos de Sociedades";}
+    if ($regimen_fiscal == 625) {$regimen = "Regimen de las Actividades Empresariales con ingresos a traves de Plataformas Tecnologicas";}
+    if ($regimen_fiscal == 626) {$regimen = "Regimen Simplificado de Confianza";}
+
+    $regimen = strtoupper($regimen);
         
+    $Emisor="
+    <div>
+        <div style='font-size: 14px;'><b>EMISOR:</b></div>
+        <div style='font-size: 13px;'>$emisor_nombre </div>
+        <div style='font-size: 13px;'> <b>RFC:</b> $emisor_rfc</div>
+        <div style='font-size: 13px;'> <b>REGIMEN FISCAL:($regimen_fiscal)<br></b>$regimen</div>
         <br/>
      </div>
     ";
@@ -1886,7 +1951,7 @@ $ExpedidoEn="
     $expedido_municipio $expedido_localidad, $expedido_estado, $expedido_pais CP:$expedido_CP
 </div>
 ";
-if($version=='3.3')
+if($version=='4.0')
 {
     $ExpedidoEn='<hr/>';
 }
@@ -1913,15 +1978,37 @@ if($version=='3.2')
     </div>
     ";
 }
-if($version=='3.3')
+if($version=='4.0')
 {
+    $regimen = "";
+
+    if ($receptor_rf == 601) {$regimen = "General de Ley Personas Morales";}
+    if ($receptor_rf == 603) {$regimen = "Personas Morales con Fines no Lucrativos";}
+    if ($receptor_rf == 605) {$regimen = "Sueldos y Salarios e Ingresos Asimilados a Salarios";}
+    if ($receptor_rf == 606) {$regimen = "Arrendamiento";}
+    if ($receptor_rf == 607) {$regimen = "Regimen de Enajenación o Adquisicion de Bienes";}
+    if ($receptor_rf == 608) {$regimen = "Demas ingresos";}
+    if ($receptor_rf == 610) {$regimen = "Residentes en el Extranjero sin Establecimiento Permanente en Mexico";}
+    if ($receptor_rf == 611) {$regimen = "Ingresos por Dividendos (socios y accionistas)";}
+    if ($receptor_rf == 612) {$regimen = "Personas Fisicas con Actividades Empresariales y Profesionales";}
+    if ($receptor_rf == 614) {$regimen = "Ingresos por intereses";}
+    if ($receptor_rf == 615) {$regimen = "Regimen de los ingresos por obtencion de premios";}
+    if ($receptor_rf == 616) {$regimen = "Sin obligaciones fiscales";}
+    if ($receptor_rf == 620) {$regimen = "Sociedades Cooperativas de Produccion que optan por diferir sus ingresos";}
+    if ($receptor_rf == 621) {$regimen = "Incorporacion Fiscal";}
+    if ($receptor_rf == 622) {$regimen = "Actividades Agricolas, Ganaderas, Silvicolas y Pesqueras";}
+    if ($receptor_rf == 623) {$regimen = "Opcional para Grupos de Sociedades";}
+    if ($receptor_rf == 625) {$regimen = "Regimen de las Actividades Empresariales con ingresos a traves de Plataformas Tecnologicas";}
+    if ($receptor_rf == 626) {$regimen = "Regimen Simplificado de Confianza";}
+
+    $regimen = strtoupper($regimen);
+
     $Receptor="
-    <div class='factura_receptor factura_cuadro '>
-        <div class='factura_titulo_ch'><b>RECEPTOR:</b></div>
-        <div class='factura_titulo_empresa'>$receptor_nombre  </div>
-        RFC: $receptor_rfc<br/>
-        USO CFDI: $uso_CFDi
-        
+    <div>
+        <divstyle='font-size: 14px;'><b>RECEPTOR:</b></div>
+        <div style='font-size: 13px;'>$receptor_nombre  </div>
+        <div style='font-size: 13px;'><b>RFC:</b> $receptor_rfc | <b>USO:</b> $uso_CFDi | <b>CP:</b> $receptor_cp</div>
+        <div style='font-size: 13px;'><b>REGIMEN FISCAL: ($receptor_rf)</b><br> $regimen </div>
     </div>
     ";
 }
@@ -2044,7 +2131,7 @@ $sellos_pie.="<b>$html_parcialidades</b>
     <b>Cadena Original</b><br/>
     $cadena_sat 
     <br/>
-<b>Este documento es una representaci�n impresa de un CFDI 3.3</b>
+<b>Este documento es una representacion impresa de un CFDI 4.0</b>
             <br/>
 $referencia $barcode_factura 
         </span>
@@ -2098,11 +2185,12 @@ if($CURP!='')
 $pie="
 <hr>
 <table width='100%' border=0>
+    $info_global
     <tr>
-    <td><center>IMPORTE: $ $subtotal_</center></td>
-    <td><center>$iva_txt</center></td>
-    <td><center><b>TOTAL $ $total_ $Moneda </b></center></td>
-  </tr>
+        <td><center><b>IMPORTE:</b> $ $subtotal_</center></td>
+        <td><center>$iva_txt</center></td>
+        <td><center><b>TOTAL:</b> $ $total_ $Moneda </center></td>
+    </tr>
 </table>
 <hr>
 ";

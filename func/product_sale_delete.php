@@ -1,6 +1,6 @@
 <?php
     include 'db.php';
-    db_sessionValidarNO();
+    
     
     $url = $_POST['url'];
     $id = $_POST['id'];
@@ -11,11 +11,7 @@
     $url = str_replace("?nodelete=true", "", $url);
 
     $con = db_conectar();  
-
-    if ($_SESSION['token'] == GetToken())
-    {
-        mysqli_query($con,"DELETE FROM product_venta WHERE id = '$id';");
-    }
+    mysqli_query($con,"DELETE FROM product_venta WHERE id = '$id';");
 
     if (!mysqli_error($con))
     {

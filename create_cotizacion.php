@@ -3,16 +3,19 @@
 ?>
 <div class="col-md-12">
     <div class="section-title-2 text-uppercase mb-40 text-center">
-            <h4>SELECCIONE CLIENTE PARA REALIZAR COTIZACION</h4>
+            <h4>SELECCIONE CONTACTO PARA REALIZAR COTIZACION</h4>
     </div>
     <?php 
-        if ($_GET["search"])
-        {
-            echo create_sale_SelectClientSearchCot($_GET["search"], $_GET["pagina"]);
-        }else
-        {
-            echo create_sale_SelectClientCot($_GET["pagina"]);
-        }
+
+    if ($_GET["search"] && $_GET["pagina"])
+    {
+        echo create_sale_SelectClientSearchCot($_GET["search"], $_GET["pagina"]);
+    }
+    elseif ($_GET["pagina"])
+    {
+        echo create_sale_SelectClientCot($_GET["pagina"]);
+    }
+
     ?>
 </div>  
 <script>
@@ -29,10 +32,11 @@ if (getUrlVars()["clientreturn"])
 </script>
 <?php
     include 'func/footer.php';
-    if ($_GET["search"])
+    if ($_GET["search"] && $_GET["pagina"])
     {
         echo select_client_sale_modal_search_cot($_GET["search"], $_GET["pagina"]);
-    }else
+    }
+    elseif ($_GET["pagina"])
     {
         echo select_client_sale_modal_cot($_GET["pagina"]);
     }

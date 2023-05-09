@@ -1,25 +1,26 @@
 <?php
-error_reporting(E_ALL);
+error_reporting(E_ERROR);                        
 include_once "../../sdk2.php";
-
 $datos['PAC']['usuario'] = "DEMO700101XXX";
 $datos['PAC']['pass'] = "DEMO700101XXX";
-$datos['modulo']="cancelacion2018"; 
+$datos['modulo']="cancelacion2022"; 
 $datos['accion']="cancelar";                                                  
 $datos["produccion"]="NO"; 
-$datos["xml"]="../../timbrados/cfdi_ejemplo_factura.xml";
-//$datos["uuid"]="25d57a90-77cc-4fe2-acf6-67a3c2f2508d";
-$datos["rfc"] ="LAN7008173R5";
+//$datos["xml"]="../../timbrados/cfdi_ejemplo_factura.xml";
+$datos["uuid"]="e95c803b-47da-433d-aafd-0cf90f3df1d6";
+$datos["rfc"] ="EKU9003173C9";
 $datos["password"]="12345678a";
-$datos["b64Cer"]="Certificados/lan7008173r5.cer";
-$datos["b64Key"]="Certificados/lan7008173r5.key";
+$datos["motivo"]="02";
+//$datos["folioSustitucion"]="";
+$datos["b64Cer"]="../../certificados/EKU9003173C9.cer";
+$datos["b64Key"]="../../certificados/EKU9003173C9.key";
+echo "<pre>";
+print_r($datos);
+echo "</pre>";
 $res = mf_ejecuta_modulo($datos);
-
 echo "<pre>";
 print_r($res);
-echo $res;
 echo "</pre>";
-
 /*NOTA: PARA REALIZAR LA CANCELACION SE REQUIERE EL UUID DE LA FACTURA A CANCELAR. 
 OPCIONALMENTE PODRA ENVIAR EL XML Y DE AHI SE ESTRAERÁ EL UUID, POR LO CUAL DEBE DE ELGIR UNA DE LAS 2 OPCIONES. ($datos["uuid"] O $datos["xml"])
 EN CASO DE QUE POR ERROR SE ENVIEN AMBOS PARAMETROS EL VALOR QUE SERA TOMADO EN CUENTA SERA EL QUE ESTÉ EN EL CAMPO UUID

@@ -6,8 +6,9 @@ function ___timbrarini($datos)
     mf_carga_libreria($__mf_constantes__['__MF_LIBS_DIR__'] . 'nusoap/nusoap.php');
 
     $pac = rand(1, 10);
-    //$url_ws = "http://pac$pac.multifacturas.com/pac/timbrarini.php?wsdl";
-    $url_ws = "http://192.168.10.111/pac/timbrarini.php?wsdl";
+    
+    $url_ws="http://ini.facturacionmexico.com.mx/timbrarini.php?wsdl";
+    
     $cliente = new nusoap_client($url_ws);
 
     unset($datos['modulo']);
@@ -39,8 +40,16 @@ function ___timbrarini($datos)
         'key' => base64_encode(file_get_contents($key)),
         'pass' => $datos['conf']['pass']
     );
-
+    /*
+    echo "<pre>";
+    print_r($params);
+    echo "<pre>";
+    */
+    
     $resp = $cliente->call('timbrarini1', $params);
-
+    /*echo "<pre>";
+    print_r($resp);
+    echo "<pre>";
+    */
     return $resp;
 }

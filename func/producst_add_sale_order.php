@@ -6,7 +6,7 @@
     $product = $_POST['product'];
     $folio = $_POST['folio'];
     $url = $_POST['url'];
-    $precio = ConvertMxnToUsd($_POST['costo'], $product);
+    $precio = $_POST['costo'];
 
     
     $url = str_replace("&add_product_sale=true", "", $url);

@@ -6,7 +6,6 @@ date_default_timezone_set('America/Mexico_City');
 include_once "../../sdk2.php";
 
 $datos['RESPUESTA_UTF8'] = "SI";
-
 $datos['PAC']['usuario'] = "DEMO700101XXX";    
 $datos['PAC']['pass'] = "DEMO700101XXX";
 $datos['PAC']['produccion'] = "NO";

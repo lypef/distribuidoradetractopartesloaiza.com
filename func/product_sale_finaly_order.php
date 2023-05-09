@@ -4,9 +4,19 @@
     $con = db_conectar();  
     
     $folio = $_POST['folio'];
+    $estrategia = $_POST['estrategia'];
+
+    if ($_POST['facturar'])
+    {
+        $facturar = 1;
+    }else
+    {
+        $facturar = 0;
+    }
+    
     $total = 0;
     $descuento = Sale_Descuento($folio);
-    $fecha = date("Y-m-d H:i:s");
+    
 
     $Lproducts = mysqli_query($con,"SELECT product, unidades, precio, p_generico FROM `product_pedido` where folio_venta = '$folio';");
     while($row = mysqli_fetch_array($Lproducts))
@@ -37,7 +47,7 @@
     
     if ($adeudo <= 0)
     {
-        mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', cobrado = '$total', fecha_venta = '$fecha' WHERE folio = $folio;");
+        mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', `facturar` = '$facturar', `estrategia` = '$estrategia' WHERE folio = $folio;");
         if (!mysqli_error($con))
         {
             echo '<script>location.href = "/orders.php?folio='.$folio.'&sale_finaly=true"</script>';

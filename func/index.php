@@ -1,3 +1,5 @@
 <?php
-	  echo '<script>location.href = "/"</script>';
+	  include 'db.php';
+      db_sessionValidarNO();
+      echo '<script>location.href = "../control.php"</script>';
 ?>

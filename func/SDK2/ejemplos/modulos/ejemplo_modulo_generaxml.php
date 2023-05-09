@@ -12,8 +12,8 @@ $datos['PAC']['pass'] = 'DEMO700101XXX';
 $datos['PAC']['produccion'] = 'NO'; //   [SI|NO]
 
 // Certificados
-$datos['conf']['cer'] = 'pruebas/aaa010101aaa.cer.pem';
-$datos['conf']['key'] = 'pruebas/aaa010101aaa.key.pem';
+$datos['conf']['cer'] = 'pruebas/XIA190128J61.cer.pem';
+$datos['conf']['key'] = 'pruebas/XIA190128J61.key.pem';
 $datos['conf']['pass'] = '12345678a';
 
 //RUTA DONDE ALMACENARA EL CFDI
@@ -65,7 +65,7 @@ $datos['xml']['cfdi:Comprobante']['TipoCambio'] = '1.0000';
 $datos['xml']['cfdi:Comprobante']['descuento'] = '0.0000';
 
 // Datos del Emisor
-$datos['xml']['cfdi:Comprobante']['cfdi:Emisor']['rfc'] = 'AAA010101AAA';
+$datos['xml']['cfdi:Comprobante']['cfdi:Emisor']['rfc'] = 'XIA190128J61';
 $datos['xml']['cfdi:Comprobante']['cfdi:Emisor']['nombre'] = 'ACCEM SERVICIOS EMPRESARIALES SC';
 $datos['xml']['cfdi:Comprobante']['cfdi:Emisor']['cfdi:DomicilioFiscal']['calle'] = 'JUAREZ';
 $datos['xml']['cfdi:Comprobante']['cfdi:Emisor']['cfdi:DomicilioFiscal']['noExterior'] = '100';

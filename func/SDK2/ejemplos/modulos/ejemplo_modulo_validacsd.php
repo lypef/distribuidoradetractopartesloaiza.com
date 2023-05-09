@@ -13,8 +13,8 @@ $datos['PAC']['produccion'] = "NO";
 
 $datos['modulo'] = "validacsd";
 
-$datos['cer'] = 'pruebas/aaa010101aaa.cer.pem';
-$datos['key'] = 'pruebas/aaa010101aaa.key.pem';
+$datos['cer'] = 'pruebas/XIA190128J61.cer.pem';
+$datos['key'] = 'pruebas/XIA190128J61.key.pem';
 $datos['pass'] = '12345679a';
 
 $res = cargar_modulo_multifacturas($datos);

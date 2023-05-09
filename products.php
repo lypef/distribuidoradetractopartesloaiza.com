@@ -9,7 +9,7 @@
                     <div class="row">
                         <div class="product-list tab-content">
                             <div role="tabpanel" class="tab-pane fade in active" id="home">
-                            <?php 
+                                <?php 
                                     if ($_GET["department"])
                                     {
                                         echo _getProductsDepartment($_GET["department"],$_GET["pagina"]);
@@ -105,10 +105,16 @@
     {
         echo _getProductsModal($_GET["pagina"]);
     }
-
+    
     if ($_GET["folio_sale"])
     {
-        echo '<meta http-equiv="refresh" content="0; url=sale_finaly_report.php?folio_sale='.$_GET["folio_sale"].'">';
+        //echo '<meta http-equiv="refresh" content="0; url=sale_finaly_report.php?folio_sale='.$_GET["folio_sale"].'">';
+        echo 
+        '
+            <script type="text/javascript" language="javascript">
+            window.open("sale_finaly_report_plain.php?folio_sale='.$_GET["folio_sale"].'");
+            </script>
+        ';
     }
 ?>
         

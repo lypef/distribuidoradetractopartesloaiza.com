@@ -1,5 +1,19 @@
 <?php
+function formato_rfc_sdk($rfc)
+{
+    
+    
+	$rfc=trim($rfc);
+	$rfc=str_replace('-','',$rfc);
+	$rfc=str_replace(' ','',$rfc);
+	$rfc=strtoupper($rfc);
+ 
+    //$rfc=utf8_decode($rfc);
 
+   // echo $rfc=utf8_encode($rfc);
+    
+	return $rfc;
+}
 function elimina_ampersand($texto)
 {
 	// Se corrigen los ampersand
@@ -32,10 +46,27 @@ function elimina_ampersand($texto)
 
 function mf_default(&$datos)
 {
+
+if(count($datos['rFE'])>0)
+{
+	date_default_timezone_set('America/Panama');
+}	
+if(count($datos['retencion'])>0)
+{
+	date_default_timezone_set('America/Mexico_City');
+}	
+if(count($datos['emisor']['rfc'])>0)
+{
+	date_default_timezone_set('America/Mexico_City');
+}	
+	
     // Retencion por defecto en NO
     if(!isset($datos['retencion']))
     {
         $datos['retencion']='NO';
+    }else{
+      
+        // $datos['emisor']['RfcE'] = formato_rfc_sdk($datos['emisor']['RfcE']);;
     }
 
     // Modo externo por defecto en SI
@@ -47,36 +78,37 @@ function mf_default(&$datos)
 	// Se eliminan ampersand
 	if(isset($datos['emisor']['rfc']))
 	{
-		$datos['emisor']['rfc'] = elimina_ampersand($datos['emisor']['rfc']);
+		$datos['emisor']['rfc'] = formato_rfc_sdk($datos['emisor']['rfc']);
 	}
 	if(isset($datos['receptor']['rfc']))
 	{
-		$datos['receptor']['rfc'] = elimina_ampersand($datos['receptor']['rfc']);
+		$datos['receptor']['rfc'] = formato_rfc_sdk($datos['receptor']['rfc']);
 	}
+    
+    if(isset($datos['factura']['descuento']))
+    {
+        if($datos['factura']['descuento']<=0)
+        {
+            unset($datos['factura']['descuento']);
+        }
+        
+    }
+/// PANAMA    
+    $fecha=date("c",time()-1);
+	if($datos['rFE']['gDGen']['dFechaEm']=='AUTO')
+		$datos['rFE']['gDGen']['dFechaEm']=$fecha;
 	
-	
-	// Ajuste de nuevo RFC de pruebas
-	/*if(isset($datos['emisor']['rfc']) && $datos['emisor']['rfc'] == 'AAA010101AAA')
+	for($i=0;$i<10;$i++)
 	{
-		// Se cambia el RFC
-		$datos['emisor']['rfc'] = 'LAN7008173R5';
-		
-		if(strpos(strtolower($datos['conf']['cer']), 'certificados/aaa010101aaa') !== false)
-		{
-			$datos['conf'] = array(
-				'cer' => '../../certificados/lan7008173r5.cer.pem',
-				'key' => '../../certificados/lan7008173r5.key.pem',
-				'pass' => '12345678a'
-			);
-		}
-		
-		if(strpos(strtolower($datos['conf']['cer']), 'certificados\aaa010101aaa') !== false)
-		{
-			$datos['conf']['cer'] = str_replace('certificados\aaa010101aaa', 'certificados\lan7008173r5');
-			$datos['conf']['key'] = str_replace('certificados\aaa010101aaa', 'certificados\lan7008173r5');
-			$datos['pass'] = '12345678a';
-		}
-	}*/
-	
+		if($datos['rFE']['gTot']['gPagPlazo'][$i]['dFecItPlazo']=='AUTO')
+			$datos['rFE']['gTot']['gPagPlazo'][$i]['dFecItPlazo']=$fecha;
+	}
+//MEXICO
+	$fechamx=date('Y-m-d\TH:i:s', time() - 10);
+	if($datos['factura']['fecha_expedicion']=='AUTO')
+	{
+		$datos['factura']['fecha_expedicion']=$fechamx;
+	}
+
     return $datos;
 }

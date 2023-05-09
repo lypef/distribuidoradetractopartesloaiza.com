@@ -22,35 +22,39 @@ include_once 'SDK2/sdk2.php';
         $cfdi_pass = $row[6];
     }
 
-    $datos['PAC']['usuario'] = 'LOLA560503FU9';
-    $datos['PAC']['pass'] = 'loaiza';
+    
+    $datos['PAC']['usuario'] = $cfdi_rfc;
+    $datos['PAC']['pass'] = $cfdi_pass;
     $datos['PAC']['produccion'] = "SI";
-    $datos['modulo']="cancelacion2018"; 
+    $datos['modulo']="cancelacion2022"; 
     $datos['accion']="cancelar";
     $datos['produccion']='SI'; 
     $datos["xml"]= 'SDK2/timbrados/'.$folio.'.xml';
     //$datos["uuid"]="25d57a90-77cc-4fe2-acf6-67a3c2f2508d";
-    $datos["rfc"] ='LOLA560503FU9';
-    $datos["password"] = 'alfo5653';
-    $datos["b64Cer"] = 'SDK2/certificados/CSD_alfonso_loaiza_loaeza_LOLA560503FU9_20180604_133248s.cer';
-    $datos["b64Key"] = 'SDK2/certificados/CSD_alfonso_loaiza_loaeza_LOLA560503FU9_20180604_133248.key';
+    $datos["rfc"] =$cfdi_rfc;
+    $datos["password"]=$cfdi_pass;
+    $datos["motivo"]="02";
+    $datos["b64Cer"] = $cfdi_cer;
+    $datos["b64Key"] = $cfdi_key;
 
     $res = mf_ejecuta_modulo($datos);
-    
+    echo "<pre>";
+    print_r($res);
+    echo "</pre>";
         
-    if ($res["codigo_mf_texto"] == 0)
+    /*if ($res["codigo_mf_texto"] == 0)
     {
         echo "<h1>Cancelacion en proceso</h1>";
         echo "<pre>";
         print_r($res);
         echo "</pre>";
-        mysqli_query(db_conectar(),"DELETE from `facturas` WHERE folio = '$folio';");
-        echo '<script>location.href = "/facturas.php?pagina=1"</script>';
+        mysqli_query(db_conectar(),"UPDATE `facturas` set estatus = 'Proceso cancelar' WHERE folio = '$folio';");
+       // echo '<script>location.href = "/facturas.php?search='.$folio.'"</script>';
     }else
     {
         echo "<pre>";
         print_r($res);
         echo "</pre>";
 
-    }
+    }*/
 ?>

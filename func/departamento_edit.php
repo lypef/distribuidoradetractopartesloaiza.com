@@ -7,10 +7,7 @@
     $descripcion = $_POST['departamento_add_descripcion'];
     
     $con = db_conectar();  
-    if ($_SESSION['token'] == GetToken())
-    {
-        mysqli_query($con,"UPDATE `departamentos` SET `nombre` = '$nombre', `descripcion` = '$descripcion' WHERE id = '$id';");
-    }
+    mysqli_query($con,"UPDATE `departamentos` SET `nombre` = '$nombre', `descripcion` = '$descripcion' WHERE id = '$id';");
 
     if (!mysqli_error($con))
     {

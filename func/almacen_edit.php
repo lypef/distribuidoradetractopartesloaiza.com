@@ -8,9 +8,7 @@
     $telefono = $_POST['almacen_telefono'];
     
     $con = db_conectar();  
-    
-    if ($_SESSION['token'] == GetToken())
-    {mysqli_query($con,"UPDATE `almacen` SET `nombre` = '$nombre', `ubicacion` = '$ubicacion', `telefono` = '$telefono' WHERE id = '$id';");}
+    mysqli_query($con,"UPDATE `almacen` SET `nombre` = '$nombre', `ubicacion` = '$ubicacion', `telefono` = '$telefono' WHERE id = '$id';");
 
     if (!mysqli_error($con))
     {

@@ -79,8 +79,8 @@ function mf_calculos_auto_nomina12(&$datos)
 
         // Total percepciones
         $datos['nomina12']['TotalPercepciones'] = $datos['nomina12']['Percepciones']['TotalSueldos'] +
-            $datos['nomina12']['Percepciones']['TotalSeparacionIndemnizaci髇'] +
-            $datos['nomina12']['Percepciones']['TotalJubilaci髇Pensi髇Retiro)'];
+            $datos['nomina12']['Percepciones']['TotalSeparacionIndemnizaci贸n'] +
+            $datos['nomina12']['Percepciones']['TotalJubilaci贸nPensi贸nRetiro)'];
     }
 
     // Deducciones
@@ -135,7 +135,7 @@ function mf_calculos_auto_nomina12(&$datos)
             'cantidad' => '1',
             'ClaveUnidad' => 'ACT',
             'ClaveProdServ' => '84111505',
-            'descripcion' => 'Pago de n髆ina',
+            'descripcion' => 'Pago de n贸mina',
             'valorunitario' => $valorunitario,
             'importe' => $importe,
             'Descuento' => $datos['nomina12']['TotalDeducciones']

@@ -14,7 +14,6 @@ $datos['PAC']['produccion'] = "NO";
 $datos['modulo'] = "codigopostal";
 $datos['CP'] = "35027";
 
-
 $res = mf_ejecuta_modulo($datos);
 
 echo "<pre>";

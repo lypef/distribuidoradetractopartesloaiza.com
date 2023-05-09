@@ -1,17 +1,16 @@
 <?php
     include 'func/header.php';
 ?>
-
 <body>
 
 <div class="col-md-12">
     <?php 
         if ($_GET["search"])
         {
-            echo table_cotizaciones_search($_GET["search"]); 
+            echo table_cotizaciones_search($_GET["pagina"],$_GET["search"]); 
         }else
         {
-            echo table_cotizaciones(); 
+            echo table_cotizaciones($_GET["pagina"]); 
         }
     ?>
 </div>  
@@ -44,5 +43,12 @@
 </script>
 <?php
     include 'func/footer.php';
-    echo table_cotizacion_modal();
+    
+    if ($_GET["search"])
+    {
+        echo table_cotizacion_modal_search($_GET["pagina"],$_GET["search"]); 
+    }else
+    {
+        echo table_cotizacion_modal($_GET["pagina"]);
+    }
 ?>

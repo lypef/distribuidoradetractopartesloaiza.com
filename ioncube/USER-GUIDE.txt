@@ -1,4 +1,4 @@
-ionCube Loader 10 User Guide
+ionCube Loader 12 User Guide
 ============================
 
 This document describes the available php.ini configuration options of the
@@ -75,13 +75,16 @@ LIMITATIONS OF LOADERS AND ENCODED FILES
 
 Encoded files can, in general, run on versions of PHP equal to
 or greater than the source language of the Encoder used to
-produce them. So a file produced by the Encoder for PHP 5.3
-can be run by the Loaders for PHP 5.3, 5.4, 5.5 and PHP 5.6. This 
-means that the Loaders are highly backwards compatible. However, there
-are the following limitations:
+produce them. So a file produced by the Encoder for PHP 7.2
+can be run by the Loaders for PHP 7.2, 7.3 and 7.4, but 7.1. This 
+means that the Loaders offer good backwards compatibility, 
+however there are the following limitations:
 
-  * The Loader for PHP 7.1 can only run files produced by the
-    Encoder for PHP 7.1 included in the version 10 Encoder.
+  * The Loader for PHP 8.1 can only run files produced by the
+    version 12 Encoder for PHP 8.1.
+
+  * The Loaders for PHP 7.1 through 7.4 can only run files 
+    produced by the Encoders for PHP 7. 
 
   * The Loader for PHP 7.0 can only run files produced by the
     Encoder for PHP 5.6.
@@ -327,4 +330,4 @@ Example:
 
 ic24.phperr.ignore = E_NOTICE | E_DEPRECATED
 
-(c) ionCube Ltd. 2018
+(c) ionCube Ltd. 2022

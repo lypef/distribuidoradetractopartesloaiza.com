@@ -4,10 +4,20 @@
     $con = db_conectar();  
     
     $folio = $_POST['folio'];
+    $estrategia = $_POST['estrategia'];
+    
+    if ($_POST['facturar'])
+    {
+        $facturar = 1;
+    }else
+    {
+        $facturar = 0;
+    }
+
     $fecha = date("Y-m-d H:i:s");
     $descuento = Sale_Descuento($folio);
     $total = 0;
-
+    
     $Lproducts = mysqli_query($con,"SELECT product, unidades, precio, product_sub, p_generico FROM `product_venta` where folio_venta = '$folio';");
     while($row = mysqli_fetch_array($Lproducts))
     {
@@ -32,10 +42,13 @@
     $total = $total - ($total * ($descuento / 100));
     
      
-    mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', `cotizacion` = '0', `fecha_venta` = '$fecha', `cobrado` = '$total' WHERE folio = $folio;");
+    mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', `facturar` = '$facturar', `cotizacion` = '0', `fecha_venta` = '$fecha', `cobrado` = '$total', `estrategia` = '$estrategia' WHERE folio = $folio;");
 
     if (!mysqli_error($con))
     {
+        SendMailLog($folio, true);
+        mysqli_query($con,"UPDATE credits SET abono = adeudo , pay = 1 where factura = '$folio' ");
+        ProspectToClient($folio);
         echo '<script>location.href = "/products.php?pagina=1&sale_ok=true&folio_sale='.$folio.'"</script>';
     }else
     {

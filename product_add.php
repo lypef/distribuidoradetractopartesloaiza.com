@@ -52,17 +52,12 @@
               </div>
 
               
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <label>Precio normal<span class="required">*</span></label>
                 <input type="text" name="precio" id="precio" placeholder="Precio al publico" required>
             </div>
 
-            <div class="col-md-4">
-                <label>Precio USD</label>
-                <input type="text" name="precio_usd" id="precio_usd" placeholder="Precio publico USD" value="0">
-            </div>
-            
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label>Precio de costo</label>
                 <input type="text" name="precio_costo" id="precio_costo" placeholder="Precio de costo">
             </div>
@@ -144,9 +139,16 @@
             </div>
 
             <div class="country-select shop-select col-md-6">
+                <br>
+                <label class="containeruser">Solicitar medidas y precio al vender este producto
+                    <input type="checkbox" id="pedir_medidas" name="pedir_medidas">
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+            
+            <div class="country-select shop-select col-md-6">
                 <button class="submit-btn mt-20" type="submit">Guardar</button>
             </div>
-
 
           </div>
       </form>

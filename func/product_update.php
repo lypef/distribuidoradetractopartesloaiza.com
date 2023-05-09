@@ -2,15 +2,12 @@
     $url = $_POST['url'];
     $url = str_replace("&update_producto=true", "", $url);
     $url = str_replace("&noupdate_producto=true", "", $url);
-
-    include 'db.php';
-    db_sessionValidarNO();
-    $con = db_conectar(); 
-
-
-    if ($_POST['precio'] > 0 && $_POST['p_oferta'] > 0 && $_SESSION['token'] == GetToken() )
+    
+    if ($_POST['precio'] > 0 && $_POST['p_oferta'] > 0)
     {
-         
+        include 'db.php';
+        db_sessionValidarNO();
+        $con = db_conectar();  
         
         $id = $_POST['id'];
         $url_img_1 = ReturnUrlImg1($_POST['id']);
@@ -77,7 +74,14 @@
         $cv = $_POST['cv'];
         $um = $_POST['um'];
         $um_des = $_POST['um_des'];
-        $precio_usd = $_POST['precio_usd'];
+
+        if ($_POST['pedir_medidas'])
+        {
+            $pedir_medidas = 1;
+        }else
+        {
+            $pedir_medidas = 0;
+        }
         
         $name_img = date("YmdHis").".jpg";
 
@@ -134,7 +138,7 @@
             }
         }
 
-        mysqli_query($con,"UPDATE `productos` SET `no. De parte` = '$parte', `nombre` = '$nombre', `descripcion` = '$descripcion', `almacen` = '$almacen', `departamento` = '$departamento', `loc_almacen` = '$ubicacion', `marca` = '$marca', `proveedor` = '$proveedor', `oferta` = '$use_oferta', `precio_normal` = '$precio', `precio_oferta` = '$p_oferta', `stock` = '$stock', `tiempo de entrega` = '$t_entrega', `stock_min` = '$stock_min', `stock_max` = '$stock_max', `precio_costo` = '$precio_costo', `cv` = '$cv', `um` = '$um', `um_des` = '$um_des', `precio_usd` = '$precio_usd' WHERE `productos`.`id` = $id;");
+        mysqli_query($con,"UPDATE `productos` SET `no. De parte` = '$parte', `pedir_medidas` = '$pedir_medidas', `nombre` = '$nombre', `descripcion` = '$descripcion', `almacen` = '$almacen', `departamento` = '$departamento', `loc_almacen` = '$ubicacion', `marca` = '$marca', `proveedor` = '$proveedor', `oferta` = '$use_oferta', `precio_normal` = '$precio', `precio_oferta` = '$p_oferta', `stock` = '$stock', `tiempo de entrega` = '$t_entrega', `stock_min` = '$stock_min', `stock_max` = '$stock_max', `precio_costo` = '$precio_costo', `cv` = '$cv', `um` = '$um', `um_des` = '$um_des' WHERE `productos`.`id` = $id;");
 
         if (!mysqli_error($con))
         {

@@ -3,7 +3,13 @@
     header("Content-Disposition: attachment; filename=reporte_adicionales.xls");
     
     require_once 'func/db.php';
-    require_once("dompdf/dompdf_config.inc.php");
+    // Dompdf php 7
+    require_once 'dompdf_php7.1/autoload.inc.php';
+    use Dompdf\Dompdf;
+
+    // Dompdf php 5
+    //require_once("dompdf/dompdf_config.inc.php");
+
     session_start();
     
     $con = db_conectar();  
@@ -72,7 +78,7 @@
     <h3><center>'.$_SESSION['empresa_direccion'].'</center></h3>
     <h3><center>MAIL: '.$_SESSION['empresa_correo'].' | TEL: '.$_SESSION['empresa_telefono'].'</center></h3>
     <h4><center>LISTA DE PRODUCTOS EN EXISTENCIA</center></h4>
-    <h1><center>TOTAL DE INVENTARIO: $ '.number_format($total_inventario,2,".",",").'</center></h1>
+    <h1><center>TOTAL DE INVENTARIO: $ '.number_format($total_inventario,GetNumberDecimales(),".",",").'</center></h1>
     <table style="width:100%">
         <tr>
         <th class="table-head th-name uppercase">NO. PARTE</th>

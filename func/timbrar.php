@@ -4,9 +4,12 @@ error_reporting(~(E_WARNING|E_NOTICE));
 //error_reporting(E_ALL);
 
 // Se especifica la zona horaria
-date_default_timezone_set('America/Mexico_City');
+date_default_timezone_set('America/Mazatlan');
 
 require_once 'db.php';
+//require_once 'imprime.php';
+// Se incluye el SDK
+require_once 'SDK2/sdk2.php';
 
 if (ExistFact($_POST['folio']) == false)
 {
@@ -19,6 +22,10 @@ if (ExistFact($_POST['folio']) == false)
     $cfdi_moneda = $_POST['cfdi_moneda'];
     $cfdi_serie = $_POST['cfdi_serie'];
     $stock = $_POST['stock'];
+
+    $periodo = $_POST['periodo'];
+    $mes = $_POST['mes'];
+    $year = $_POST['year'];
     
     if ($_POST['remisionar'])
     {
@@ -41,7 +48,7 @@ if (ExistFact($_POST['folio']) == false)
         $cfdi_pass = $row[6];
     }
 
-    $cliente = mysqli_query(db_conectar(),"SELECT c.rfc, c.razon_social, c.correo, c.id FROM folio_venta v, clients c WHERE v.client = c.id and v.folio = '$folio'");
+    $cliente = mysqli_query(db_conectar(),"SELECT c.rfc, c.razon_social, c.correo, c.id, v.descuento, c.r_fiscal, c.d_fiscal FROM folio_venta v, clients c WHERE v.client = c.id and v.folio = '$folio'");
 
     while($row = mysqli_fetch_array($cliente))
     {
@@ -49,14 +56,15 @@ if (ExistFact($_POST['folio']) == false)
         $cfdi_cliente_r_social = $row[1];
         $cfdi_cliente_correo = $row[2];
         $cfdi_cliente_id = $row[3];
+        $venta_descuento = $row[4] / 100;
+        $cfdi_cliente_r_fiscal = $row[5];
+        $cfdi_cliente_d_fiscal = strtoupper($row[6]);
     }
 
+    // Se especifica la version de CFDi 4.0
+    $datos['version_cfdi'] = '4.0';
 
-    // Se incluye el SDK
-    require_once 'SDK2/sdk2.php';
-
-    // Se especifica la version de CFDi 3.3
-    $datos['version_cfdi'] = '3.3';
+    $datos['validacion_local']='NO';
 
     // Ruta del XML Timbrado
     $datos['cfdi']='SDK2/timbrados/'.$folio.'.xml';
@@ -65,14 +73,14 @@ if (ExistFact($_POST['folio']) == false)
     $datos['xml_debug']='SDK2/timbrados/'.$folio.'.xml';
 
     // Credenciales de Timbrado
-    $datos['PAC']['usuario'] = 'LOLA560503FU9';
-    $datos['PAC']['pass'] = 'loaiza';
+    $datos['PAC']['usuario'] = 'DTP191016P83';
+    $datos['PAC']['pass'] = 'diesel1234';
     $datos['PAC']['produccion'] = 'SI';
 
     // Rutas y clave de los CSD
-    $datos['conf']['cer'] = 'SDK2/certificados/CSD_alfonso_loaiza_loaeza_LOLA560503FU9_20180604_133248s.cer';
-    $datos['conf']['key'] = 'SDK2/certificados/CSD_alfonso_loaiza_loaeza_LOLA560503FU9_20180604_133248.key';
-    $datos['conf']['pass'] = 'alfo5653';
+    $datos['conf']['cer'] = 'SDK2/certificados/cer.cer';
+    $datos['conf']['key'] = 'SDK2/certificados/llave.key';
+    $datos['conf']['pass'] = 'diesel1234';
 
     // Datos de la Factura
     $datos['factura']['condicionesDePago'] = 'CONDICIONES';
@@ -86,16 +94,28 @@ if (ExistFact($_POST['folio']) == false)
     $datos['factura']['serie'] = $cfdi_serie;
     $datos['factura']['tipocambio'] = 1.00;
     $datos['factura']['tipocomprobante'] = $cfdi_tipo;
-    $datos['factura']['RegimenFiscal'] = '612';
-
+    $datos['factura']['Exportacion'] = '01';
+    
     // Datos del Emisor
-    $datos['emisor']['rfc'] = 'LOLA560503FU9'; //RFC DE PRUEBA
-    $datos['emisor']['nombre'] = 'ALFONSO LOAIZA LOEZA';  // EMPRESA DE PRUEBA
+    $datos['emisor']['rfc'] = 'DTP191016P83'; //RFC DE PRUEBA
+    $datos['emisor']['nombre'] = 'DIESEL Y TRACTO PARTES LOAIZA';  // EMPRESA DE PRUEBA
+    $datos['emisor']['RegimenFiscal'] = '601';
 
     // Datos del Receptor
     $datos['receptor']['rfc'] = $cfdi_cliente_rfc;
     $datos['receptor']['nombre'] = $cfdi_cliente_r_social;
     $datos['receptor']['UsoCFDI'] = $cfdi_uso;
+    $datos['receptor']['DomicilioFiscalReceptor'] = $cfdi_cliente_d_fiscal;
+    $datos['receptor']['RegimenFiscalReceptor'] = $cfdi_cliente_r_fiscal;
+
+    //Informacion Global
+    if (isset($periodo))
+    {
+        $datos['InformacionGlobal']['Periodicidad'] = $periodo;
+        $datos['InformacionGlobal']['Meses'] = $mes;
+        $datos['InformacionGlobal']['Año'] = $year;
+    }
+    
 
     // Se agregan los conceptos
     
@@ -118,7 +138,9 @@ if (ExistFact($_POST['folio']) == false)
     {
         $cont = $cont + 1;
 
-        $total_tmp = number_format(($row[0] * $row[2]), 2, ".", "");;
+        $PriceAndOff = $row[2] - ($row[2] * $venta_descuento);
+        
+        $total_tmp = number_format(($row[0] * $PriceAndOff), 2, ".", "");;
         $iva_tmp = number_format( ( ($total_tmp / 1.160000) * 0.160000 ), 2, ".", "");;
 
         $total = $total +  $total_tmp;
@@ -135,7 +157,7 @@ if (ExistFact($_POST['folio']) == false)
         $datos['conceptos'][$cont]['unidad'] = $um_des;
         $datos['conceptos'][$cont]['ID'] = $row[7];
         $datos['conceptos'][$cont]['descripcion'] = $row[1];
-        $datos['conceptos'][$cont]['valorunitario'] = number_format($row[2] / 1.160000, 2, ".", "");
+        $datos['conceptos'][$cont]['valorunitario'] = number_format($PriceAndOff / 1.160000, 2, ".", "");
         $datos['conceptos'][$cont]['importe'] = number_format($total_tmp / 1.160000, 2, ".", "");
         
         
@@ -154,7 +176,8 @@ if (ExistFact($_POST['folio']) == false)
         
         $datos['conceptos'][$cont]['ClaveProdServ'] = $ClaveProdServ;
         $datos['conceptos'][$cont]['ClaveUnidad'] = $ClaveUnidad;
-
+        $datos['conceptos'][$cont]['ObjetoImp'] = '02';
+        
 
         $datos['conceptos'][$cont]['Impuestos']['Traslados'][0]['Base'] = number_format($total_tmp / 1.160000, 2, ".", "");
         $datos['conceptos'][$cont]['Impuestos']['Traslados'][0]['Impuesto'] = '002';
@@ -168,7 +191,9 @@ if (ExistFact($_POST['folio']) == false)
     {
         $cont = $cont + 1;
 
-        $total_tmp = number_format(($row[0] * $row[2]), 2, ".", "");;
+        $PriceAndOff = $row[2] - ($row[2] * $venta_descuento);
+        
+        $total_tmp = number_format(($row[0] * $PriceAndOff), 2, ".", "");;
         $iva_tmp = number_format( ( ($total_tmp / 1.160000) * 0.160000 ), 2, ".", "");;
 
         $total = $total +  $total_tmp;
@@ -179,10 +204,11 @@ if (ExistFact($_POST['folio']) == false)
         $datos['conceptos'][$cont]['unidad'] = 'NA';
         $datos['conceptos'][$cont]['ID'] = $row[3];
         $datos['conceptos'][$cont]['descripcion'] = $row[1];
-        $datos['conceptos'][$cont]['valorunitario'] = number_format($row[2] / 1.160000, 2, ".", "");
+        $datos['conceptos'][$cont]['valorunitario'] = number_format($PriceAndOff / 1.160000, 2, ".", "");
         $datos['conceptos'][$cont]['importe'] = number_format($total_tmp / 1.160000, 2, ".", "");
         $datos['conceptos'][$cont]['ClaveProdServ'] = '01010101';
         $datos['conceptos'][$cont]['ClaveUnidad'] = 'ACT';
+        $datos['conceptos'][$cont]['ObjetoImp'] = '02';
 
 
         $datos['conceptos'][$cont]['Impuestos']['Traslados'][0]['Base'] = number_format($total_tmp / 1.160000, 2, ".", "");
@@ -194,39 +220,32 @@ if (ExistFact($_POST['folio']) == false)
     }
 
     // Se agregan los Impuestos
+    $datos['impuestos']['translados'][0]['Base'] = number_format($total - $total_iva, 2, ".", "");
     $datos['impuestos']['translados'][0]['impuesto'] = '002';
     $datos['impuestos']['translados'][0]['tasa'] = '0.160000';
-    $datos['impuestos']['translados'][0]['importe'] =  number_format($total_iva, 2, ".", "");;
+    $datos['impuestos']['translados'][0]['importe'] =  number_format($total_iva, 2, ".", "");
     $datos['impuestos']['translados'][0]['TipoFactor'] = 'Tasa';
 
 
-    $datos['impuestos']['TotalImpuestosTrasladados'] =  number_format($total_iva, 2, ".", "");;
+    $datos['impuestos']['TotalImpuestosTrasladados'] =  number_format($total_iva, 2, ".", "");
 
     //Se agregan totales
-    $datos['factura']['subtotal'] = number_format($total - $total_iva, 2, ".", "");;
+    $datos['factura']['subtotal'] = number_format($total - $total_iva, 2, ".", "");
     $datos['factura']['total'] = number_format($total, 2, ".", "");;
 
     // Se ejecuta el SDK
-    $res = mf_genera_cfdi($datos);
+    $res = mf_genera_cfdi4($datos);
 
-
-    ///////////    MOSTRAR RESULTADOS DEL ARRAY $res   ///////////
-    /*echo "<pre>";
-    print_r($datos);
-    echo "</pre>";*/
-
-    if ($res["codigo_mf_texto"] == 0)
+    if ($res["codigo_mf_numero"] == 0)
     {
-
-        echo "<h1>Respuesta Generar XML y Timbrado</h1>";
+        /*echo "<h1>Respuesta Generar XML y Timbrado</h1>";
         foreach ($res AS $variable => $valor) {
             $valor = htmlentities($valor);
             $valor = str_replace('&lt;br/&gt;', '<br/>', $valor);
             echo "<b>[$variable]=</b>$valor<hr>";
-        }
+        }*/
 
-
-        //Generar pdf
+        ///Generar pdf
         $datosHTML['RESPUESTA_UTF8'] = "SI";
         $datosHTML['PAC']['usuario'] = "DEMO700101XXX";
         $datosHTML['PAC']['pass'] = "DEMO700101XXX";
@@ -246,47 +265,195 @@ if (ExistFact($_POST['folio']) == false)
 
         $res = mf_ejecuta_modulo($datosHTML);                                  //FUNCION QUE CARGA EL MODULO cfdi2html
         $HTML=$res['html'];                                     //HTML DEL XML           //RESPUESTA DE LA FUNCION CARGAR MODULO
+
+        // Convgertir Html a pdf 
+        $HTML = eregi_replace("<head[^>]*>"," ", $HTML);
+        $HTML = eregi_replace("</head[^>]*>"," ", $HTML);
+        $HTML = eregi_replace("<link[^>]*>"," ", $HTML);
+        $HTML = eregi_replace("</link[^>]*>"," ", $HTML);
+
+
+        require_once("../dompdf_php5.6/dompdf_config.inc.php");
+        $HTML = mb_convert_encoding($HTML, 'HTML-ENTITIES', 'UTF-8');
+
+        $dompdf=new DOMPDF();
+        $dompdf->set_paper('letter');
+        $dompdf->load_html($HTML);
+        ini_set("memory_limit","128M");
+        $dompdf->render();
+        $output = $dompdf->output();
+        file_put_contents('SDK2/timbrados/'.$folio.'.pdf', $output);
+        //$dompdf->stream($folio.".pdf");
+
         
-        echo 'html' . $html;
-
-        //////////////////////////////////////////////////////////////////////////////
-        //CONVERTIR EL HTML DEL XML CFDI A PDF
-        $datosPDF['PAC']['usuario'] = "DEMO700101XXX";
-        $datosPDF['PAC']['pass'] = "DEMO700101XXX";
-        $datosPDF['PAC']['produccion'] = "NO";
-        $datosPDF['modulo']="html2pdf";                                                   //NOMBRE MODULO
-        $datosPDF['html']="$HTML";                                                        // HTML DE XML CFDI A CONVERTIR A PDF
-        $datosPDF['archivo_html']="";                                                     // OPCION SI SE TIENE UN ARCHIVO .HTML       
-        $datosPDF['archivo_pdf']='SDK2/timbrados/'.$folio.'.pdf';
-        //$datosPDF['archivo_pdf']="RUTA DONDE SE CREARA EL PDF/nombrearhivo.pdf";          //RUTA DONDE SE GUARDARA EL PDF
-
-        $res = mf_ejecuta_modulo($datosPDF);                                    //RESPUESTA DE LA FUNCION CARGAR MODULO  
-        //$res = ___html2pdf($datosPDF);                                    //RESPUESTA DE LA FUNCION CARGAR MODULO
-
-        echo "<pre>";
-        print_r($res);
-        echo $res;
-        echo "</pre>";
-
-        $from = "contacto@distribuidoradetractopartesloaiza.com";
+        
         $to = $cfdi_cliente_correo;
+        $to .= ','.static_empresa_email();
+	    $to = str_replace("", ",,", $to);
+	    
         $subject = "FACTURA CFDI: " . $cfdi_serie . $folio;
-
-        $cabecera = "From: DTPL-CONTACTO <contacto@distribuidoradetractopartesloaiza.com>"."\r\n";
-        $cabecera .= "Content-type: text/html;  charset=utf-8"; 
-
-        $message = 'ESTIMADO/A '. $cfdi_cliente_r_social .', SE ADJUNTA PDF Y XML DE SU FACTURA VALIDA ANTE EL SAT. <br><br>Fichero XML: <a href="http://www.distribuidoradetractopartesloaiza.com/func/' . $datosHTML['rutaxml'] . '" target="_blank">Factura XML</a><br><br>Fichero PDF: <a href="http://www.distribuidoradetractopartesloaiza.com/func/' . $datosPDF['archivo_pdf'].'" target="_blank">Factura PDF</a>';
-
-        $headers = "From:" . $from;
-
-        mail($to,$subject,$message, $cabecera);
-        echo "Correo en viado.";
-
+        
+        $message = '<html>
+                <head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+                    
+                    
+                    <link href="styles.css" media="all" rel="stylesheet" type="text/css" />
+                    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet">
+                    <style>
+                    /* Reset -------------------------------------------------------------------- */
+                    *    { margin: 0;padding: 0; }
+                    body { font-size: 14px; }
+            
+                    /* OPPS --------------------------------------------------------------------- */
+            
+                    h4 {
+                        margin-bottom: 8px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                    }
+            
+                    .opps {
+                        width: 100%; 
+                        border-radius: 4px;
+                        box-sizing: border-box;
+                        padding: 0 45px;
+                        margin: 40px auto;
+                        overflow: hidden;
+                        border: 1px solid #b0afb5;
+                        font-family: "Open Sans", sans-serif;
+                        color: #4f5365;
+                    }
+            
+                    .opps-reminder {
+                        position: relative;
+                        top: -1px;
+                        padding: 9px 0 10px;
+                        font-size: 11px;
+                        text-transform: uppercase;
+                        text-align: center;
+                        color: #ffffff;
+                        background: #000000;
+                    }
+            
+                    .opps-info {
+                        margin-top: 26px;
+                        position: relative;
+                    }
+            
+                    .opps-info:after {
+                        visibility: hidden;
+                        display: block;
+                        font-size: 0;
+                        content: " ";
+                        clear: both;
+                        height: 0;
+            
+                    }
+            
+                    .opps-ammount {
+                        width: 100%;
+                        float: right;
+                    }
+            
+                    .opps-ammount h2 {
+                        font-size: 36px;
+                        color: #000000;
+                        line-height: 24px;
+                        margin-bottom: 15px;
+                    }
+            
+                    .opps-ammount h2 sup {
+                        font-size: 16px;
+                        position: relative;
+                        top: -2px
+                    }
+            
+                    .opps-ammount p {
+                        font-size: 10px;
+                        line-height: 14px;
+                    }
+            
+                    .opps-reference {
+                        margin-top: 14px;
+                    }
+            
+                    h3 {
+                        font-size: 15px;
+                        color: #000000;
+                        text-align: center;
+                        margin-top: -1px;
+                        padding: 6px 0 7px;
+                        border: 1px solid #b0afb5;
+                        border-radius: 4px;
+                        background: #f8f9fa;
+                    }
+            
+                    .opps-instructions {
+                        margin: 32px -45px 0;
+                        padding: 32px 45px 45px;
+                        border-top: 1px solid #b0afb5;
+                        background: #f8f9fa;
+                    }
+            
+                    ol {
+                        margin: 14px 0 0 13px;
+                    }
+            
+                    li + li {
+                        margin-top: 8px;
+                        color: #000000;
+                    }
+            
+                    a {
+                        color: #1155cc;
+                    }
+            
+                    .opps-footnote {
+                        margin-top: 22px;
+                        padding: 22px 20 24px;
+                        color: #108f30;
+                        text-align: center;
+                        border: 1px solid #108f30;
+                        border-radius: 4px;
+                        background: #ffffff;
+                    }
+            </style>
+                </head>
+                <body>
+                <div class="opps">
+                <div class="opps-header">
+                    <div class="opps-reminder">FACTURA CFDI 4.0</div>
+                    <div class="opps-info">
+                        <div class="opps-reference">
+                            <h4>RECEPTOR: '. $cfdi_cliente_r_social.'</h4>
+                    <h3> Fichero XML: <a href="'.static_empresa_url().'func/SDK2/timbrados/'.$folio.'.xml" target="_blank">Factura XML</a><br><br>Fichero PDF: <a href="'.static_empresa_url().'func/SDK2/timbrados/'.$folio.'.pdf" target="_blank">Factura PDF</a>
+                    </h3>
+                                </div>
+                        </div>
+                  </p>
+                        <div class="opps-instructions">
+                            <div class="opps-footnote"><strong>AGRADECEMOS SU COMPRA</strong></div>
+                        </div>
+                    </div>  
+                </body>
+            </html>';
+        
+        
+        $cabecera = "From: DTPL"."\r\n";
+		$cabecera .= "Reply-To: ".static_empresa_email_responder()."\r\n";
+		$cabecera .= "Content-type: text/html;  charset=utf-8";
+		
+        mail($to, $subject, $message,$cabecera);
+        
+    
+        // ** Finaliza envio de correo
+    
         $c = db_conectar();
 
         mysqli_query($c,"INSERT INTO `facturas` (`serie`, `folio`, `estatus`, `cliente`) VALUES ('$cfdi_serie', '$folio', 'Vigente', '$cfdi_cliente_id');");
 
-        echo mysqli_error($c);
+        //echo mysqli_error($c);
 
         //Verificar si se remisiona
         if ($remisionar > 0)
@@ -362,13 +529,24 @@ if (ExistFact($_POST['folio']) == false)
                 if ($adeudo <= 0)
                 {
                     mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0' WHERE folio = $folio;");
+                    mysqli_query($con,"UPDATE credits SET abono = adeudo , pay = 1 where factura = '$folio' ");
                 }
             }
         }
+        ProspectToClient($folio);
         echo '<script>location.href = "SDK2/timbrados/'.$folio.'.pdf"</script>';
+        SendMailLog($folio, false);
+    }else
+    {
+        echo "<h1>Error</h1>";
+        foreach ($res AS $variable => $valor) {
+            $valor = htmlentities($valor);
+            $valor = str_replace('&lt;br/&gt;', '<br/>', $valor);
+            echo "<b>[$variable]=</b>$valor<hr>";
+        }
     }
     }else
     {
-        echo 'Este folio ya se encuenta facturado. consulte facturas.';
+        echo '<script>location.href = "SDK2/timbrados/'.$_POST['folio'].'.pdf"</script>';
     }
-?>
+?>  

@@ -7,20 +7,30 @@
     $cfdi_cliente_correo = $_POST['cfdi_cliente_correo'];
     $cfdi_serie = $_POST['cfdi_serie'];
 
-    $from = "contacto@distribuidoradetractopartesloaiza.com";
-    $to = $cfdi_cliente_correo;
-    $subject = "FACTURA CFDI: " . $cfdi_serie;
+    // Phpmail
+    
+    $url = str_replace("&sendmail=true","",$url);
+    $url = str_replace("?sendmail=true","",$url);
+    $url = str_replace("&nosendmail=true","",$url);
+    $url = str_replace("?nosendmail=true","",$url);
 
-    $cabecera = "From: DTPL-CONTACTO <contacto@distribuidoradetractopartesloaiza.com>"."\r\n";
-    $cabecera .= "Content-type: text/html;  charset=utf-8"; 
+    
+    $message = 'SE REENVIA PDF Y XML DE SU FACTURA VALIDA ANTE EL SAT. <br><br>Fichero XML: <a href="'.static_empresa_url().'func/SDK2/timbrados/' . $folio . '.xml" target="_blank">Factura XML</a><br><br>Fichero PDF: <a href="'.static_empresa_url().'func/SDK2/timbrados/' . $folio . '.pdf" target="_blank">Factura PDF</a>';
+    
+    //$message = $message . '<br><br><b>Si no puede acceder a el enlace, ingrese manualmente aqui.</b><br>' . $current_url.'/sale_finaly_report_cotizacion.php?folio_sale='.$folio;
 
-    $message = 'SE REENVIA PDF Y XML DE SU FACTURA VALIDA ANTE EL SAT. <br><br>Fichero XML: <a href="http://www.distribuidoradetractopartesloaiza.com/func/SDK2/timbrados/' . $folio . '.xml" target="_blank">Factura XML</a><br><br>Fichero PDF: <a href="http://www.distribuidoradetractopartesloaiza.com/func/SDK2/timbrados/' . $folio . '.pdf" target="_blank">Factura PDF</a>';
-
-    $headers = "From:" . $from;
-
-    mail($to,$subject,$message, $cabecera);
-
+    $asunto = 'FACTURA CFDI: '. $folio;
+    
     $addpregunta = false;
+
+    $mail_receptor = static_empresa_email_responder();
+        
+    $cabecera = "From: DTPL"."\r\n";
+    $cabecera .= "Reply-To: ".static_empresa_email_responder()."\r\n";
+    $cabecera .= "Content-type: text/html;  charset=utf-8";
+    
+
+
 
     for($i=0;$i<strlen($url);$i++)
     {
@@ -32,8 +42,17 @@
 
     if ($addpregunta)
     {
-        echo '<script>location.href = "'.$url.'&send_mail=true"</script>';
-    }else{
-        echo '<script>location.href = "'.$url.'?send_mail=true"</script>';
+        if (mail($cfdi_cliente_correo, $asunto, $message,$cabecera))
+        {
+            echo '<script>location.href = "'.$url.'&sendmail=true"</script>';
+        }else {echo '<script>location.href = "'.$url.'&nosendmail=true"</script>';}
+    }else
+    {
+        if ($r)
+        {
+            echo '<script>location.href = "'.$url.'?sendmail=true"</script>';
+        }else {echo '<script>location.href = "'.$url.'?nosendmail=true"</script>';
+            
+        }
     }
 ?>
