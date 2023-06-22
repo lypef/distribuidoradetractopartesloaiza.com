@@ -11154,6 +11154,81 @@
 		return $body;
 	}
 
+	function table_o_compra_modal($txt)
+	{
+		$data = mysqli_query(db_conectar(),"SELECT o.id, o.folio, u.nombre, o.fecha, o.unidades, o.pagar, if (o.estatus = 1, 'FINALIZADO', 'EN PROCESO') as estatus FROM order_buy o, users u WHERE o.user = u.id and (o.folio like '%$txt%' or u.nombre like '%$txt%' or u.username like '%$txt%') ORDER BY o.estatus asc");
+		
+		
+		while($row = mysqli_fetch_array($data))
+	    {
+			$body = $body.'
+			<!-- Modal -->
+			<div class="modal fade" id="delete'.$row[0].'" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">ELIMINAR ORDEN: '.$row[1].'</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form action="../func/delete_orden_compra.php" autocomplete="off" method="post">
+					<div class="row">
+						<input type="hidden" name="folio" id="folio" value="'.$row[1].'">
+						<div class="col-md-12">
+						<br>
+						<label>Esta seguro de eliminar esta orden ? Al eliminarla,ya no se podra recuperar.</label>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+					<button type="submit" class="btn btn-danger">Eliminar</button>
+					</form>
+				</div>
+				</div>
+			</div>
+			</div>
+			
+			</div>
+
+			<!-- Modal -->
+			<div class="modal fade" id="end'.$row[0].'" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">FINALIZAR ORDEN: '.$row[1].'</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form action="../func/end_orden_compra.php" autocomplete="off" method="post">
+					<div class="row">
+						<input type="hidden" name="folio" id="folio" value="'.$row[1].'">
+						<div class="col-md-12">
+						<br>
+						<label>Esta seguro de finalizar esta orden ? Todos los productos comprador incrementaran segun sea el caso.</label>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+					<button type="submit" class="btn btn-success">Finalizar</button>
+					</form>
+				</div>
+				</div>
+			</div>
+			</div>
+			
+			</div>
+			';
+		}
+		
+		return $body;
+	}
+
 	function table_orders_compra_modal_search($txt)
 	{
 		$TAMANO_PAGINA = 6;
@@ -16277,7 +16352,7 @@
 
 		$con = db_conectar();
 		
-		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.almacen = '$almacen' AND  p.proveedor like '%$proveedor%' ORDER by nombre asc");
+		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.almacen = '$almacen' AND  p.proveedor like '%$proveedor%' ORDER by p.nombre asc");
 		
 		if (!$marca)
 		{

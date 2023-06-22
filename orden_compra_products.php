@@ -135,7 +135,7 @@
 
         if ($first)
         {
-            if ($cont == 29)
+            if ($cont == 27)
             {
                 $cont = -1;
                 $first = false;
@@ -147,7 +147,7 @@
             }
         }else
         {
-            if ($cont == 37)
+            if ($cont == 34)
             {
                 $cont = -1;
                 $body_products .= 
@@ -247,7 +247,7 @@
 
         if ($first)
         {
-            if ($cont == 26)
+            if ($cont == 20)
             {
                 $cont = -1;
                 $first = false;
@@ -259,7 +259,7 @@
             }
         }else
         {
-            if ($cont == 38)
+            if ($cont == 30)
             {
                 $cont = -1;
                 $body_products .= 
@@ -306,7 +306,7 @@
         </table>
         
         <table style="height: 5px;" width="100%">
-            <tbody>
+            
             
             <tr>
                 <td bgcolor="'.$ColorBarr.'" align="center"><strong>'.$orden_de_compra.'</strong></td>
@@ -315,19 +315,19 @@
             <tr>
                 <td>
                     <table width="100%">
-                        <tbody>
+                        
                             <tr>
                                 <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><b>CREADO:</b> '.GetFechaText($fecha_ini).'</td>
                                 <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><b>GENERADO:</b> '.GetFechaText(date("Y-m-d H:i:s")).'</td>
                                 <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><b>TOTAL:</b> $ '.number_format($total_sin,GetNumberDecimales(),".",",").'</td>
                                 <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><b>FOLIO:</b> '.$folio.'</td>
                             </tr>
-                        </tbody>
+                        
                     </table>
                 </td>
             </tr>
 
-            </tbody>
+            
         </table>        
         
         <br>
@@ -346,5 +346,4 @@
         set_time_limit(200);
         $dompdf->render();
         $dompdf->stream("orden_compra".$_GET["folio"].".pdf");
-        // Finaliza reporte <normal></normal>
 ?>
