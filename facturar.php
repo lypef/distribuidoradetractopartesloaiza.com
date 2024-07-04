@@ -50,7 +50,7 @@
                 <div class="country-select shop-select col-md-3">
                     <label> Metodo de pago <span class="required">*</span></label>
                     <select id="cfdi_m_pago" name = "cfdi_m_pago">
-                        <option value='PUE'>Pago en una sola exhibición</option>
+                        <option value='PUE'>Pago en una sola exhibici��n</option>
                         <option value='PPD'>Pago en parcialidades o diferido</option>
                     </select>                                       
                 </div>
@@ -85,7 +85,7 @@
                 <div class="col-md-2" align="left">
                 <br>
                     <label class="containeruser">Afectar inventario (Remisionar)
-                        <input type="checkbox" id="remisionar" name="remisionar" checked>
+                        <input type="checkbox" id="remisionar" name="remisionar" >
                         <span class="checkmark"></span>
                     </label>
                 </div>    

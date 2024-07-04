@@ -16,6 +16,8 @@
     $url = str_replace("?noadd_product_sale=true", "", $url);
     $url = str_replace("&nostock=true", "", $url);
     $url = str_replace("?nostock=true", "", $url);
+    $url = str_replace("&delete=true", "", $url);
+    $url = str_replace("?delete=true", "", $url);
 
     $con = db_conectar();  
         if ($hijo > 0)
@@ -23,7 +25,14 @@
             mysqli_query($con,"INSERT INTO `product_venta` (`folio_venta`, `product`, `unidades`, `precio`, `product_sub`) VALUES ('$folio', '$product', '$unidades', '$precio', '$hijo');");
         }else
         {
-            mysqli_query($con,"INSERT INTO `product_venta` (`folio_venta`, `product`, `unidades`, `precio`) VALUES ('$folio', '$product', '$unidades', '$precio');");
+            //if ( ProductStock($product) >= $unidades )
+            if ( true )
+            {
+                mysqli_query($con,"INSERT INTO `product_venta` (`folio_venta`, `product`, `unidades`, `precio`) VALUES ('$folio', '$product', '$unidades', '$precio');");
+            }else
+            {
+                echo '<script>location.href = "'.$url.'&noadd_product_sale=true"</script>';
+            }
         }
         
     

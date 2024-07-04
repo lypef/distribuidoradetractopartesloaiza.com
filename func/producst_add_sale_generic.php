@@ -11,7 +11,7 @@
         $url = $_POST['url'];
         $precio = $_POST['costo'];
         $hijo = $_POST['hijo'];
-        $p_generic = $_POST['p_generic'];
+        $p_generic = Comillas($_POST['p_generic']);
         
         
         $url = str_replace("&add_product_sale=true", "", $url);

@@ -238,6 +238,7 @@
         <p>Al finalizar la venta, el sistema disminuira las existencias de cada producto agregado y posteriomente tomara la sumatoria como un ingreso.</p>
         
         <form action="func/product_sale_finaly.php" method="post" enctype="multipart/form-data">        
+        <input type="hidden" id="tipo" name="tipo" value="remision">
         <?php echo Select_estrategias(); ?>
 
         <br><br>

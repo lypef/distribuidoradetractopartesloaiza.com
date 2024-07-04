@@ -10,8 +10,8 @@
         $con = db_conectar();  
         
         $id = $_POST['id'];
-        $parte = $_POST['parte'];
-        $nombre = $_POST['name'];
+        $parte = Comillas($_POST['parte']);
+        $nombre = Comillas($_POST['name']);
         $precio = $_POST['precio'];
         $p_oferta = $_POST['p_oferta'];
         $stock = $_POST['stock'];

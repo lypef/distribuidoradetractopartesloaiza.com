@@ -7,7 +7,7 @@
     $folio = $_POST['folio'];
     $url = $_POST['url'];
     $precio = $_POST['costo'];
-    $p_generic = $_POST['p_generic'];
+    $p_generic = Comillas($_POST['p_generic']);
     
     $url = str_replace("&add_product_sale=true", "", $url);
     $url = str_replace("?add_product_sale=true", "", $url);

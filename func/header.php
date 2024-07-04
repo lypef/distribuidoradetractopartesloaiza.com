@@ -1,5 +1,4 @@
 <?php
-    date_default_timezone_set('America/Mazatlan');
     error_reporting(0);
     include 'db.php';
     loginPermanent($_SERVER["REQUEST_URI"]);
@@ -10,6 +9,16 @@
     $almacenes = mysqli_query(db_conectar(),"SELECT a.id, a.nombre FROM sucursal_almacen sa, almacen a WHERE sa.almacen = a.id and sa.sucursal = $_SESSION[sucursal] ");
     $sales_open = mysqli_query(db_conectar(),"SELECT f.folio, v.nombre, c.nombre, f.fecha, f.descuento, f.iva FROM folio_venta f, clients c, users v where f.client = c.id and f.vendedor = v.id and f.open = 1 and f.pedido = 0 and f.cotizacion = 0 and f.vendedor = $_SESSION[users_id] ");
     $sales_open2 = mysqli_query(db_conectar(),"SELECT f.folio, v.nombre, c.nombre, f.fecha, f.descuento, f.iva FROM folio_venta f, clients c, users v where f.client = c.id and f.vendedor = v.id and f.open = 1 and f.pedido = 0 and f.cotizacion = 0 and f.vendedor = $_SESSION[users_id] ");
+
+    //
+    $sucursal = $_SESSION['sucursal'];
+    $Almacenfirst = mysqli_query(db_conectar(),"SELECT a.id, a.nombre FROM sucursal_almacen sa, almacen a where sa.sucursal = $sucursal and sa.almacen = a.id ORDER by a.nombre asc limit 1");	
+
+    if($row = mysqli_fetch_array($Almacenfirst))
+    {
+        $id_almacen = $row[0];
+    } 
+    //
 ?>
 
 <!doctype html>
@@ -300,6 +309,10 @@
                                                         if ($_SESSION['product_gest'] == 1)
                                                         {
                                                             echo '<li><a href="products.php?pagina=1">Gestionar</a></li>';
+                                                            echo '<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
+                                                            echo '<li><a href="/products_inventary.php?pagina=1&txt=&almacen='.$id_almacen.'">Inventario</a></li>';
+                                                            echo '<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
+                                                            echo '<li><a href="/products_vendidos_all.php?proveedor=&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'">Conteo de vendidos</a></li>';
                                                             echo '<hr style="margin-top: 0em; margin-bottom: 0.9em;">';
                                                             echo '<li><a href="" data-toggle="modal" data-target="#GenOneCodeBar">Imprimir Un Codigo </a></li>';
                                                             echo '<li><a href="" data-toggle="modal" data-target="#GenMulCodeBar">Imprimir Multiples Codigos </a></li>';
@@ -1096,3 +1109,19 @@
             return vars;
           }
         </script> 
+<style>
+    
+    input, textarea, select {
+        border: 1px solid #797979;
+        font-weight: bold;
+        color: #000000;
+    }
+    
+    textarea[type=text]:focus {
+    border: 3px solid #ff1744;
+    }
+
+    select:focus {
+    border: 3px solid #ff1744;
+    }
+</style>

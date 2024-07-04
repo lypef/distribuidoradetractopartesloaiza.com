@@ -1353,7 +1353,11 @@ CREATE TABLE `product_pedido` (
   `product` int(11) DEFAULT NULL,
   `unidades` int(11) NOT NULL,
   `precio` float NOT NULL,
-  `p_generico` varchar(254) DEFAULT NULL
+  `p_generico` varchar(254) DEFAULT NULL,
+  `ancho` decimal(64,2) NOT NULL DEFAULT '0.00',
+  `alto` decimal(64,2) NOT NULL DEFAULT '0.00',
+  `largo` decimal(64,2) NOT NULL DEFAULT '0.00',
+  `peso` decimal(64,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -2585,6 +2589,15 @@ ALTER TABLE `traspasos`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `vendedor_sucursal` FOREIGN KEY (`sucursal`) REFERENCES `sucursales` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+  ALTER TABLE `producto_vendidos`
+  ADD PRIMARY KEY (`id`);
+
+
+  ALTER TABLE `producto_vendidos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+  
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

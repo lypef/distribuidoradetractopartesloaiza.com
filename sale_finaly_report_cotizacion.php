@@ -8,7 +8,8 @@
     require_once("dompdf_php5.6/dompdf_config.inc.php");
 	
     $ColorBarr = ColorBarrReport();
-
+    $total_sin = 0;
+    
     $folio = $_GET["folio_sale"];
     session_start();
     $usd = GetUsd();
@@ -341,7 +342,6 @@
         margin-bottom: 0.1em;
     }
     </style>
-    <body>
     <table width="100%" border="0">
         <tr>
             <td width="35%">
@@ -358,32 +358,29 @@
     </table>
     
     <table style="height: 5px;" width="100%">
-    <tbody>
+    
     <tr>
     <td bgcolor="'.$ColorBarr .'" align="center"><strong>CLIENTE: </strong>'.strtoupper($cliente . $r_social).'</td>
     </tr>
     <tr>
     <td>
      <table width="100%">
-    <tbody>
+    
     <tr>
      
     <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><b>FECHA:</b> '.GetFechaText($fecha_ini).'</td>
     <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><b>NO. COTIZACION: </b> '.$folio.'</td>
     </tr>
-    </tbody>
     </table>
     
     <br>
     <table style="height: 5px;" width="100%">
-    <tbody>
     <tr>
     <td bgcolor="'.$ColorBarr .'" align="center"><strong>'.numtoletras($total_pagar_).'</strong></td>
     </tr>
     <tr>
     <td>
      <table width="100%">
-    <tbody>
     <tr>
      
     <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><strong> TOTAL:</strong> $ '.number_format($total_sin,GetNumberDecimales(),".",",").'</td>
@@ -405,12 +402,10 @@
     
     </tr>
     
-    </tbody>
     </table>
      
      </td>
     </tr>
-    </tbody>
     </table>
     '.$body_products.'';
     
@@ -435,7 +430,7 @@
         $codigoHTML .= '
         <br>
         <table style="width: 100%; border-collapse: collapse;" border="0" cellspacing="0">
-        <tbody>
+        
         <tr>
         <td style="background-color: '.colorbarrreport().'; text-align: center; font-family: Arial, serif; font-size: x-small;"><span style="color: #000000;"><strong>BANAMEX</strong></span></td>
         </tr>
@@ -448,7 +443,6 @@
         <tr>
         <td style="background-color: '.colorbarrreport() .'; text-align: center; font-family: Arial, serif; font-size: X-small;"><strong><span style="color: #000000;"><em>| www.cyberchoapas.com | ::: GRUPO ASCGAR ::: | www.ascgar.com |</em></span></strong></td>
         </tr>
-        </tbody>
         </table>
         ';
     }
@@ -458,7 +452,7 @@
         $codigoHTML .= '
         <br>
         <table style="width: 100%; border-collapse: collapse;" border="0" cellspacing="0">
-        <tbody>
+        
         <tr>
         <td style="background-color: '.colorbarrreport().'; text-align: center; font-family: Arial, serif; font-size: x-small;"><span style="color: #000000;"><strong>BANAMEX OXXO SALDAZO</strong></span></td>
         </tr>
@@ -471,7 +465,7 @@
         <tr>
         <td style="background-color: '.colorbarrreport() .'; text-align: center; font-family: Arial, serif; font-size: X-small;"><strong><span style="color: #000000;"><em>| www.cyberchoapas.com | ::: GRUPO ASCGAR ::: | www.ascgar.com |</em></span></strong></td>
         </tr>
-        </tbody>
+        
         </table>
         ';
     }
@@ -481,7 +475,7 @@
         $codigoHTML .= '
         <br>
         <table style="width: 100%; border-collapse: collapse;" border="0" cellspacing="0">
-        <tbody>
+        
         <tr>
         <td style="background-color: '.colorbarrreport().'; text-align: center; font-family: Arial, serif; font-size: x-small;"><span style="color: #000000;"><strong>SANTANDER<br /></strong></span></td>
         </tr>
@@ -494,7 +488,6 @@
         <tr>
         <td style="background-color: '.colorbarrreport() .'; text-align: center; font-family: Arial, serif; font-size: X-small;"><strong><span style="color: #000000;"><em>| www.cyberchoapas.com | ::: GRUPO ASCGAR ::: | www.ascgar.com |</em></span></strong></td>
         </tr>
-        </tbody>
         </table>
         ';
     }
@@ -504,7 +497,7 @@
         $codigoHTML .= '
         <br>
         <table style="width: 100%; border-collapse: collapse;" border="0" cellspacing="0">
-        <tbody>
+        
         <tr>
         <td style="background-color: '.colorbarrreport().'; text-align: center; font-family: Arial, serif; font-size: x-small;"><span style="color: #000000;"><strong>BANCOPPEL<br /></strong></span></td>
         </tr>
@@ -517,7 +510,7 @@
         <tr>
         <td style="background-color: '.colorbarrreport() .'; text-align: center; font-family: Arial, serif; font-size: X-small;"><strong><span style="color: #000000;"><em>| www.cyberchoapas.com | ::: GRUPO ASCGAR ::: | www.ascgar.com |</em></span></strong></td>
         </tr>
-        </tbody>
+        
         </table>
         ';
     }
@@ -527,7 +520,7 @@
         $codigoHTML .= '
         <br>
         <table style="width: 100%; border-collapse: collapse;" border="0" cellspacing="0">
-        <tbody>
+        
         <tr>
         <td style="background-color: '.colorbarrreport().'; text-align: center; font-family: Arial, serif; font-size: x-small;"><span style="color: #000000;"><strong>BANCOPPEL<br /></strong></span></td>
         </tr>
@@ -540,7 +533,7 @@
         <tr>
         <td style="background-color: '.colorbarrreport() .'; text-align: center; font-family: Arial, serif; font-size: X-small;"><strong><span style="color: #000000;"><em>| www.cyberchoapas.com | ::: GRUPO ASCGAR ::: | www.ascgar.com |</em></span></strong></td>
         </tr>
-        </tbody>
+        
         </table>
         ';
     }
@@ -550,7 +543,7 @@
         $codigoHTML .= '
         <br>
         <table style="width: 100%; border-collapse: collapse;" border="0" cellspacing="0">
-        <tbody>
+        
         <tr>
         <td style="background-color: '.colorbarrreport().'; text-align: center; font-family: Arial, serif; font-size: x-small;"><span style="color: #000000;"><strong>PAYPAL</strong></span></td>
         </tr>
@@ -563,10 +556,10 @@
         <tr>
         <td style="background-color: '.colorbarrreport() .'; text-align: center; font-family: Arial, serif; font-size: X-small;"><strong><span style="color: #000000;"><em>| www.cyberchoapas.com | ::: GRUPO ASCGAR ::: | www.ascgar.com |</em></span></strong></td>
         </tr>
-        </tbody>
         </table>
         ';
     }
+    
     
     $codigoHTML = mb_convert_encoding($codigoHTML, 'HTML-ENTITIES', 'UTF-8');
   

@@ -4,54 +4,72 @@
     $con = db_conectar();  
     
     $folio = $_POST['folio'];
-    $estrategia = $_POST['estrategia'];
-    
-    if ($_POST['facturar'])
-    {
-        $facturar = 1;
-    }else
-    {
-        $facturar = 0;
-    }
 
-    $fecha = date("Y-m-d H:i:s");
-    $descuento = Sale_Descuento($folio);
-    $total = 0;
-    
-    $Lproducts = mysqli_query($con,"SELECT product, unidades, precio, product_sub, p_generico FROM `product_venta` where folio_venta = '$folio';");
-    while($row = mysqli_fetch_array($Lproducts))
+    $ValExi = Product_validarExistencias($folio);
+
+    if (empty($ValExi))
     {
-        if ($row[4] == "")
+        //
+        $estrategia = $_POST['estrategia'];
+    
+        if ($_POST['facturar'])
         {
-            $total = $total + ($row[1] * $row[2]);
-            if ($row[3])
+            $facturar = 1;
+        }else
+        {
+            $facturar = 0;
+        }
+
+        $fecha = date("Y-m-d H:i:s");
+        $descuento = Sale_Descuento($folio);
+        $total = 0;
+        
+        $Lproducts = mysqli_query($con,"SELECT product, unidades, precio, product_sub, p_generico FROM `product_venta` where folio_venta = '$folio';");
+        while($row = mysqli_fetch_array($Lproducts))
+        {
+            if ($row[4] == "")
             {
-                DescontarProductosStock_hijo($row[3], $row[1]);
-            }else
-            {
-                DescontarProductosStock($row[0], $row[1]);
+                $total = $total + ($row[1] * $row[2]);
+                if ($row[3])
+                {
+                    DescontarProductosStock_hijo($row[3], $row[1]);
+                }else
+                {
+                    DescontarProductosStock($row[0], $row[1]);
+                }
             }
         }
-    }
 
-    $genericos = mysqli_query($con,"SELECT unidades, p_generico, precio, id FROM product_venta v WHERE p_generico != '' and folio_venta = '$folio'");
-    while($row = mysqli_fetch_array($genericos))
-    {
-        $total = $total + ($row[0] * $row[2]);
-    }
-    $total = $total - ($total * ($descuento / 100));
-    
-     
-    mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', `facturar` = '$facturar', `cotizacion` = '0', `fecha_venta` = '$fecha', `cobrado` = '$total', `estrategia` = '$estrategia' WHERE folio = $folio;");
+        $genericos = mysqli_query($con,"SELECT unidades, p_generico, precio, id FROM product_venta v WHERE p_generico != '' and folio_venta = '$folio'");
+        while($row = mysqli_fetch_array($genericos))
+        {
+            $total = $total + ($row[0] * $row[2]);
+        }
+        $total = $total - ($total * ($descuento / 100));
+        
+        
+        mysqli_query($con,"UPDATE `folio_venta` SET `open` = '0', `facturar` = '$facturar', `cotizacion` = '0', `fecha_venta` = '$fecha', `cobrado` = '$total', `estrategia` = '$estrategia' WHERE folio = $folio;");
 
-    if (!mysqli_error($con))
-    {
-        SendMailLog($folio, true);
-        mysqli_query($con,"UPDATE credits SET abono = adeudo , pay = 1 where factura = '$folio' ");
-        ProspectToClient($folio);
-        echo '<script>location.href = "/products.php?pagina=1&sale_ok=true&folio_sale='.$folio.'"</script>';
-    }else
-    {
-        echo '<script>location.href = "/products.php?pagina=1&nosale_ok=true"</script>';
+        if (!mysqli_error($con))
+        {
+            SendMailLog($folio, true);
+            mysqli_query($con,"UPDATE credits SET abono = adeudo , pay = 1 where factura = '$folio' ");
+            ProspectToClient($folio);
+            echo '<script>location.href = "/products.php?pagina=1&sale_ok=true&folio_sale='.$folio.'"</script>';
+        }else
+        {
+            echo '<script>location.href = "/products.php?pagina=1&nosale_ok=true"</script>';
+        }
+        //
+    }else {
+        if ($_POST['tipo'] == "cotizacion")
+        {
+            echo '<script>location.href = "/sale_cot.php?pagina=1&folio='.$folio.'"</script>';
+        }
+
+        if ($_POST['tipo'] == "remision")
+        {
+            echo '<script>location.href = "/sale.php?pagina=1&folio='.$folio.'"</script>';   
+        }
     }
 ?>

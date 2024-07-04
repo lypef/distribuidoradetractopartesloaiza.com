@@ -12,7 +12,7 @@
         {
             $txt_user = "Todos";
             $txt_suc = "Todos";
-            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 order by s.nombre asc, v.fecha_venta desc");
+            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado, v.t_pago FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 order by s.nombre asc, v.fecha_venta desc");
             $sql_update = "UPDATE folio_venta SET cut_global = '1';";
         }
         
@@ -21,7 +21,7 @@
             $txt_user = Return_NombreUser($usuario);
             $txt_suc = Return_NombreSucursal($sucursal);
     
-            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 and v.vendedor = $usuario and v.sucursal = $sucursal order by v.fecha_venta desc");
+            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado, v.t_pago FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 and v.vendedor = $usuario and v.sucursal = $sucursal order by v.fecha_venta desc");
             $sql_update = "UPDATE folio_venta SET cut_global = '1' where vendedor = $usuario and sucursal = $sucursal;";
         }
     
@@ -29,7 +29,7 @@
         {
             $txt_user = Return_NombreUser($usuario);
             $txt_suc = "Todos";
-            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 and v.vendedor = $usuario order by v.fecha_venta desc");
+            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado, v.t_pago FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 and v.vendedor = $usuario order by v.fecha_venta desc");
             $sql_update = "UPDATE folio_venta SET cut_global = '1' where vendedor = $usuario;";
         }
     
@@ -37,7 +37,7 @@
         {
             $txt_user = "Todos";
             $txt_suc = Return_NombreSucursal($sucursal);
-            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 and v.sucursal = $sucursal order by v.fecha_venta desc");
+            $data = mysqli_query(db_conectar(),"SELECT v.folio, c.nombre, s.nombre, v.fecha_venta, v.cobrado, v.t_pago FROM folio_venta v, sucursales s, users u, clients c where v.sucursal = s.id and v.vendedor = u.id and v.client = c.id and v.open = 0 and v.cut_global = 0 and v.sucursal = $sucursal order by v.fecha_venta desc");
             $sql_update = "UPDATE folio_venta SET cut_global = '1' where sucursal = $sucursal;";
         }
         
@@ -63,6 +63,23 @@
     
         while($row = mysqli_fetch_array($data))
         {
+            if ($row[5] == "efectivo")
+            {
+                $efectivo = $efectivo + $row[4];
+            }
+            elseif ($row[5] == "transferencia")
+            {
+                $transferencia = $transferencia + $row[4];
+            }
+            elseif ($row[5] == "tarjeta")
+            {
+                $cheque = $cheque + $row[4];
+            }
+            elseif ($row[5] == "deposito")
+            {
+                $deposito = $deposito + $row[4];
+            }
+            
             $total_sin += ($row[4]);
     
             if ($Showiva)
@@ -195,11 +212,13 @@
             ';
         }
     
-        if ( ($cont+2) < 38)
-        {
+        // se pone ya que si no sale mal la ultima linea 
+        $body_products .= 
+        '
+            </table>
+        ';
     
-        }
-    
+        
         $codigoHTML='
         <style>
         @page {
@@ -258,15 +277,29 @@
                         </table>
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <table width="100%">
+                        <tr>
+                                <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><strong> Efectivo:</strong> $ '.number_format($efectivo,2,".",",").'</td>
+                                <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><strong> Tranferencia:</strong> $ '.number_format($transferencia,2,".",",").'</td>
+                                <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><strong> Tarjeta:</strong> $ '.number_format($cheque,2,".",",").'</td>
+                                <td style="border-right: 1px solid black;border-left:1px solid black;border-bottom: 1px solid black;border-top: 1px solid black" align="center"><strong> Deposito:</strong> $ '.number_format($deposito,2,".",",").'</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
         </table>
+        
         
         <br>
         '.$body_products.'
         <br>
         ';
         
+
         $codigoHTML .= FooterPageReport();
-        
+       
         $codigoHTML = mb_convert_encoding($codigoHTML, 'HTML-ENTITIES', 'UTF-8');
         $dompdf= new DOMPDF();
         $dompdf->set_paper('letter');
@@ -282,6 +315,6 @@
         $cabecera .= "Reply-To: cyberchoapas@gmail.com"."\r\n";
         $cabecera .= "Content-type: text/html;  charset=utf-8";
 
-        $enviar = mail($mail_receptor, "Corte Z Global", $codigoHTML, $cabecera); 
+        $enviar = mail($mail_receptor, "Corte Z Global", $codigoHTML, $cabecera);
     }
 ?>

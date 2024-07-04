@@ -1,0 +1,8 @@
+<?php 
+ echo 
+    '
+        <script type="text/javascript" language="javascript">
+        location.href = "/products.php?pagina=1";
+        </script>
+    ';
+?>

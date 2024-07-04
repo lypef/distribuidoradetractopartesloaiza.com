@@ -18,12 +18,12 @@
               </div>
               <div class="col-md-4">
                 <label>Numero de parte</label>
-                <input type="text" name="parte" id="parte" placeholder="AEF594-S"   >
+                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="parte" id="parte"></textarea>
               </div>
 
               <div class="col-md-4">
                 <label>Nombre del producto</label>
-                <input type="text" name="name" id="name" placeholder="Nombre producto" required>
+                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="name" id="name"></textarea>
               </div>
               
               <div class="col-md-4">

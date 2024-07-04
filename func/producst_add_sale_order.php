@@ -13,6 +13,10 @@
     $url = str_replace("?add_product_sale=true", "", $url);
     $url = str_replace("&noadd_product_sale=true", "", $url);
     $url = str_replace("?noadd_product_sale=true", "", $url);
+    $url = str_replace("&nostock=true", "", $url);
+    $url = str_replace("?nostock=true", "", $url);
+    $url = str_replace("&delete=true", "", $url);
+    $url = str_replace("?delete=true", "", $url);
 
     $con = db_conectar();  
         

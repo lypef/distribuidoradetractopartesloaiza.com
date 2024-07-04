@@ -1,15 +1,20 @@
 <?php
-// Se desactivan los mensajes de debug
-error_reporting(~(E_WARNING|E_NOTICE));
-//error_reporting(E_ALL);
+    
+    ini_set("default_charset", "UTF-8");
+    header('Content-Type: text/html; charset=UTF-8');
+    
+    // Se desactivan los mensajes de debug
+    error_reporting((E_WARNING|E_NOTICE));
+    //error_reporting(E_ALL);
+   
+    // Se especifica la zona horaria
+    date_default_timezone_set('America/Mazatlan');
 
-// Se especifica la zona horaria
-date_default_timezone_set('America/Mazatlan');
-
-require_once 'db.php';
-//require_once 'imprime.php';
-// Se incluye el SDK
-require_once 'SDK2/sdk2.php';
+    require_once 'db.php';
+    //require_once 'imprime.php';
+    
+    // Se incluye el SDK
+    require_once 'SDK2/sdk2.php';
 
 if (ExistFact($_POST['folio']) == false)
 {
@@ -73,14 +78,14 @@ if (ExistFact($_POST['folio']) == false)
     $datos['xml_debug']='SDK2/timbrados/'.$folio.'.xml';
 
     // Credenciales de Timbrado
-    $datos['PAC']['usuario'] = 'DTP191016P83';
-    $datos['PAC']['pass'] = 'diesel1234';
+    $datos['PAC']['usuario'] = 'CLM221103ANA';
+    $datos['PAC']['pass'] = 'alfo5653';
     $datos['PAC']['produccion'] = 'SI';
 
     // Rutas y clave de los CSD
     $datos['conf']['cer'] = 'SDK2/certificados/cer.cer';
     $datos['conf']['key'] = 'SDK2/certificados/llave.key';
-    $datos['conf']['pass'] = 'diesel1234';
+    $datos['conf']['pass'] = 'alfo5653';
 
     // Datos de la Factura
     $datos['factura']['condicionesDePago'] = 'CONDICIONES';
@@ -88,7 +93,7 @@ if (ExistFact($_POST['folio']) == false)
     $datos['factura']['fecha_expedicion'] = date('Y-m-d\TH:i:s', time() - 120);
     $datos['factura']['folio'] = $folio;
     $datos['factura']['forma_pago'] = $cfdi_f_pago;
-    $datos['factura']['LugarExpedicion'] = '39014';
+    $datos['factura']['LugarExpedicion'] = '39747';
     $datos['factura']['metodo_pago'] = $cfdi_m_pago;
     $datos['factura']['moneda'] = $cfdi_moneda;
     $datos['factura']['serie'] = $cfdi_serie;
@@ -97,8 +102,8 @@ if (ExistFact($_POST['folio']) == false)
     $datos['factura']['Exportacion'] = '01';
     
     // Datos del Emisor
-    $datos['emisor']['rfc'] = 'DTP191016P83'; //RFC DE PRUEBA
-    $datos['emisor']['nombre'] = 'DIESEL Y TRACTO PARTES LOAIZA';  // EMPRESA DE PRUEBA
+    $datos['emisor']['rfc'] = 'CLM221103ANA'; //RFC DE PRUEBA
+    $datos['emisor']['nombre'] = 'COMERCIALIZADORA LOAIZA MUÑOZ Y LOAIZA';  // EMPRESA DE PRUEBA
     $datos['emisor']['RegimenFiscal'] = '601';
 
     // Datos del Receptor
@@ -113,7 +118,7 @@ if (ExistFact($_POST['folio']) == false)
     {
         $datos['InformacionGlobal']['Periodicidad'] = $periodo;
         $datos['InformacionGlobal']['Meses'] = $mes;
-        $datos['InformacionGlobal']['Año'] = $year;
+        $datos['InformacionGlobal'][utf8_decode('Año')] = $year;
     }
     
 
@@ -440,8 +445,8 @@ if (ExistFact($_POST['folio']) == false)
             </html>';
         
         
-        $cabecera = "From: DTPL"."\r\n";
-		$cabecera .= "Reply-To: ".static_empresa_email_responder()."\r\n";
+        $cabecera = "From: DTPL"."ﾂ･rﾂ･n";
+		$cabecera .= "Reply-To: ".static_empresa_email_responder()."ﾂ･rﾂ･n";
 		$cabecera .= "Content-type: text/html;  charset=utf-8";
 		
         mail($to, $subject, $message,$cabecera);

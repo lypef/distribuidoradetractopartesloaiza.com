@@ -55,18 +55,18 @@
             }
         }
         
-        $parte = $_POST['parte'];
-        $nombre = $_POST['name'];
+        $parte = Comillas($_POST['parte']);
+        $nombre = Comillas($_POST['name']);
         $precio = $_POST['precio'];
         $p_oferta = $_POST['p_oferta'];
         $stock = $_POST['stock'];
-        $t_entrega = $_POST['t_entrega'];
-        $descripcion = $_POST['descripcion'];
+        $t_entrega = Comillas($_POST['t_entrega']);
+        $descripcion = Comillas($_POST['descripcion']);
         $almacen = $_POST['almacen'];
         $departamento = $_POST['departamento'];
-        $ubicacion = $_POST['ubicacion'];
-        $marca = $_POST['marca'];
-        $proveedor = $_POST['proveedor'];
+        $ubicacion = Comillas($_POST['ubicacion']);
+        $marca = Comillas($_POST['marca']);
+        $proveedor = Comillas($_POST['proveedor']);
         $use_oferta = $_POST['use_oferta'];
         $stock_min = $_POST['stock_minimo'];
         $stock_max = $_POST['stock_maximo'];

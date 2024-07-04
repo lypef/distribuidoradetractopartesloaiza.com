@@ -1,5 +1,15 @@
 <?php
 
+	date_default_timezone_set('America/Mazatlan');
+	
+	// Constantes PHPMailer
+	define("mail_username","cltareportes@gmail.com");
+	define("mail_password","iwmx zqtc madw vvkq");
+	define("mail_port",587);
+	define("mail_smtp","smtp.gmail.com");
+	define("mail_phpmailer","../phpmailer/PHPMailerAutoload.php");
+	define("mail_debug",false);
+
 	function db_conectar ()
 	{
 		$host = "localhost";
@@ -23,17 +33,18 @@
 
 	function static_empresa_url ()
 	{
-		return "https://www.distribuidoradetractopartesloaiza.com/";
+		return "https://distribuidoradetractopartesloaiza.com/";
+		//return "http://localhost/";
 	}
 
 	function static_empresa_email()
 	{
-		return "cyberchoapas@gmail.com";
+		return "alfonsoloaiza@hotmail.com";
 	}
 	
 	function static_empresa_email_responder()
 	{
-		return "cyberchoapas@gmail.com";
+		return "alfonsoloaiza@hotmail.com";
 	}
 	
 	function ColorBarrReport ()
@@ -44,7 +55,7 @@
 	function DesglosarReportIva ()
 	{
 		return true;
-	}
+	}	
 
 	function Ticket ()
 	{
@@ -54,6 +65,11 @@
 	function ReportCotTranfers ()
 	{
 		return '';
+	}
+
+	function Comillas ($var)
+	{
+		return str_replace("'","''",$var);
 	}
 
 	function CheckCredit ($id, $folio)
@@ -339,11 +355,34 @@
 	function DescontarProductosStock ($id, $unidades)
 	{
 		mysqli_query(db_conectar(),"UPDATE `productos` SET stock = stock - '$unidades' WHERE id = $id;");
+		
+		InsertProductVendidos($id, $unidades);
 	}
 
 	function DescontarProductosStock_hijo ($id, $unidades)
 	{
 		mysqli_query(db_conectar(),"UPDATE `productos_sub` SET stock = stock - '$unidades' WHERE id = $id;");
+		InsertProductVendidos($id, $unidades);
+	}
+
+	function InsertProductVendidos ($id, $unidades)
+	{
+		$date = date('Y-m-d');
+		mysqli_query(db_conectar(),"INSERT INTO `producto_vendidos` (`id`, `producto`, `unidades`, `fecha`) VALUES (NULL, $id, $unidades, '$date');");
+	}
+
+	function returnproductlasID ()
+	{
+		$data = mysqli_query(db_conectar(),"SELECT p.id FROM productos p ORDER by p.id desc LIMIT 1;");
+		
+		$body = "";
+		
+		while($row = mysqli_fetch_array($data))
+	    {
+	        $body = $row[0];
+		}
+		
+		return $body;
 	}
 
 	function returnproducts ($departamento)
@@ -554,6 +593,27 @@
 			if ($row[0])
 			{
 				$body = $body.'<option value="'.$row[0].'">'.$row[0].'</option>';
+			}
+	    }
+		return $body;
+	}
+	
+	function Select_Proveedorcont ($r)
+	{
+		$data = mysqli_query(db_conectar(),"SELECT DISTINCT proveedor FROM `productos` ORDER BY proveedor ASC");
+		$body = "<option value='' selected >TODOS LOS PROVEEDORES</option>";
+		while($row = mysqli_fetch_array($data))
+	    {
+			if ($row[0])
+			{
+				if (trim($row[0]) == trim($r))
+				{
+					$body = $body.'<option value="'.$row[0].'" selected>'.$row[0].'</option>';					
+				}
+				else
+				{
+					$body = $body.'<option value="'.$row[0].'">'.$row[0].'</option>';					
+				}
 			}
 	    }
 		return $body;
@@ -970,13 +1030,13 @@
 
 		    $precio = $row[3];
 			$msg_oferta = "";
-			$_stock = '<p>PN: '.$row[10].'</p>';
+			$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[10].'</p></a>';
 
 			if ($row[2] == 1)
 			{
 				$precio = $row[4];
 				$msg_oferta = '<span class="new-label red-color text-uppercase">off</span>';
-				$_stock = '<p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</p>';
+				$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</a></p>';
 			}
 
 	        $body = $body.'<div class="col-md-3">
@@ -1160,6 +1220,7 @@
 		return $body;
 	}
 
+	
 	function _getProducts_sale ($pagina, $folio)
 	{
 		$login = false;
@@ -1168,7 +1229,7 @@
 		if (isset($_SESSION['users_id'])){ $login = true;}
 		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
 
-		$TAMANO_PAGINA = 16;
+		$TAMANO_PAGINA = 5;
 
 		if (!$pagina) {
 			$inicio = 0;
@@ -1265,9 +1326,28 @@
 	</div>';
 		$body = $body . $pagination;
 
+		$body = $body.'
+		<div class="wishlist-area" style="background-color: #f5f5f5;">
+		<div class="container">
+		<div class="row">
+		<div class="col-md-12">
+			<div class="wishlist-content">
+			<div class="wishlist-table table-responsive p-30 text-uppercase">
+				<table>
+					<thead>
+						<tr>
+							<th class="product-thumbnail">IMAGEN</th>
+							<th class="product-name text-center"><span class="nobr">Producto</span></th>
+							<th class="product-prices text-center"><span class="nobr">PRECIO </span></th>
+							<th class="product-prices text-center"><span class="nobr">Agregar</span></th>
+						</tr>
+					</thead>
+					<tbody>
+		';
+
 		while($row = mysqli_fetch_array($data))
 	    {
-		  $precio = $row[3];
+		  	$precio = $row[3];
 			$msg_oferta = "";
 			$_stock = '<p>PN: '.$row[10].'</p>';
 
@@ -1278,43 +1358,28 @@
 				$_stock = '<p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</p>';
 			}
 
-	        $body = $body.'<div class="col-md-3">
-                                    
-			<div class="single-product mb-40">
-				<div class="product-img-content mb-20">
-					<div class="product-img">
-						<a href="/products_detail.php?id='.$row[9].'">
-							<img src="../images/'.$row[5].'" alt="" style="max-height: 180px; min-height: 180px;">
-						</a>
-					</div>
-					'.$msg_oferta.'
-					<div class="product-action text-center">
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">
-							<i class="zmdi zmdi-shopping-cart"></i>
-						</a>
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#viewM'.$row[9].'">
-							<i class="zmdi zmdi-eye"></i>
-						</a>
-					</div>
-				</div>
-				<div class="product-content text-center text-uppercase">
-					<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">'.substr($row[0], 0, 25).'.</a>
-					<div class="rating-icon">
-						'.$_stock.'
-					</div>
-					<div class="product-price">
-						<span class="new-price">$ '.$precio.' MXN</span>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		
-		
-		
+			$body = $body.'
+			
+			<tr>
+				<td class="product-thumbnail"><img src="../images/'.$row[5].'" alt="" height="110" width="110"></td>
+				
+				<td class="text-center">'.$row[0].'</td>
+				
+				<td class="text-center">$ '.number_format($precio,GetNumberDecimales(),".",",").'</td>
+				
+				<td class="text-center">
+				<a class="button small button-primary mb-20" data-toggle="modal" data-target="#add_car'.$row[9].'"><i class="zmdi zmdi-plus-circle-o-duplicate"></i></a>
+				</td>
+			</tr>
 		';
 		}
+		$body = $body . '
+		</tbody>
+			</table>
+		</div>';
+		
 		$body = $body . $pagination;
+
 		return $body;
 	}
 
@@ -1326,7 +1391,7 @@
 		if (isset($_SESSION['users_id'])){ $login = true;}
 		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
 
-		$TAMANO_PAGINA = 16;
+		$TAMANO_PAGINA = 5;
 
 		if (!$pagina) {
 			$inicio = 0;
@@ -1336,10 +1401,11 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 		
-		
 		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
 		$c_s = str_replace("almacen","s.almacen",$c);
 		$c_p = str_replace("almacen","p.almacen",$c);
+		
+		
 		$data = mysqli_query(db_conectar(),"SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.`no. De parte`, p.descripcion, d.nombre, p.marca, p.loc_almacen, p.`tiempo de entrega`, a.nombre FROM productos p, departamentos d, almacen a where p.departamento = d.id and p.almacen = a.id AND (SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and ( $c_s ) ) > 0 or p.departamento = d.id and p.almacen = a.id AND ( $c_p ) order by p.id desc LIMIT $inicio, $TAMANO_PAGINA");
 		$datatmp = mysqli_query(db_conectar(),"SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.`no. De parte`, p.descripcion, d.nombre, p.marca, p.loc_almacen, p.`tiempo de entrega`, a.nombre FROM productos p, departamentos d, almacen a where p.departamento = d.id and p.almacen = a.id AND (SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and ( $c_s ) ) > 0 or p.departamento = d.id and p.almacen = a.id AND ( $c_p )");
 
@@ -1398,36 +1464,54 @@
 									</div>
 									</div>
 									</div><p>';
-
 		$body = '<div class="row">
-					<div class="col-md-12">
-						<div class="section-title-2 text-uppercase mb-40 text-center">
-							<h4>AGREGUE PRODUCTOS A SU COTIZACION: '.$folio.'</h4>
-						</div>
-					</div>
-					<div class="col-md-12">
-						<div class="col-md-8 text-center">
-							<form class="header-search-box" action="sale_cot.php">
-							<div>
-								<input type="text" placeholder="Buscar" name="search" autocomplete="off">
-								<input type="hidden" id="folio" name="folio" value="'.$folio.'">
-							</div>
-							
-						</div>
-						<div class="col-md-4 text-right">
-							<button class="submit-btn" type="submit">Buscar</button>
-							<a href="#" title="Agregar producto generico" data-toggle="modal" data-target="#add_car_generic">
-								<button class="submit-btn" type="submit">+ Producto generico</button>
-							</a>
-							</form>
-						</div>
-					</div>
-				</div>';
+		<div class="col-md-12">
+		<div class="section-title-2 text-uppercase mb-40 text-center">
+		<h4>AGREGUE PRODUCTOS A SU VENTA: '.$folio.'</h4>
+		</div>
+	</div>
+	<div class="col-md-12">
+		<div class="col-md-8">
+			<form class="header-search-box" action="sale_cot.php">
+			<div>
+				<input type="text" placeholder="Buscar" name="search" autocomplete="off">
+				<input type="hidden" id="folio" name="folio" value="'.$folio.'">
+				<input type="hidden" id="pagina" name="pagina" value="1">
+			</div>
+			
+		</div>
+		<div class="col-md-4">
+			<button class="submit-btn" type="submit">Buscar</button>
+			<a href="#" title="Agregar producto generico" data-toggle="modal" data-target="#add_car_generic">
+				<button class="submit-btn" type="submit">+ Producto generico</button>
+			</a>
+			</form>
+		</div>
+	</div>';
 		$body = $body . $pagination;
+
+		$body = $body.'
+		<div class="wishlist-area" style="background-color: #f5f5f5;">
+		<div class="container">
+		<div class="row">
+		<div class="col-md-12">
+			<div class="wishlist-content">
+			<div class="wishlist-table table-responsive p-30 text-uppercase">
+				<table>
+					<thead>
+						<tr>
+							<th class="product-thumbnail">IMAGEN</th>
+							<th class="product-name text-center"><span class="nobr">Producto</span></th>
+							<th class="product-prices text-center"><span class="nobr">PRECIO </span></th>
+							<th class="product-prices text-center"><span class="nobr">Agregar</span></th>
+						</tr>
+					</thead>
+					<tbody>
+		';
 
 		while($row = mysqli_fetch_array($data))
 	    {
-		  $precio = $row[3];
+		  	$precio = $row[3];
 			$msg_oferta = "";
 			$_stock = '<p>PN: '.$row[10].'</p>';
 
@@ -1438,43 +1522,28 @@
 				$_stock = '<p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</p>';
 			}
 
-	        $body = $body.'<div class="col-md-3">
-                                    
-			<div class="single-product mb-40">
-				<div class="product-img-content mb-20">
-					<div class="product-img">
-						<a href="/products_detail.php?id='.$row[9].'">
-							<img src="../images/'.$row[5].'" alt="" style="max-height: 180px; min-height: 180px;">
-						</a>
-					</div>
-					'.$msg_oferta.'
-					<div class="product-action text-center">
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">
-							<i class="zmdi zmdi-shopping-cart"></i>
-						</a>
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#viewM'.$row[9].'">
-							<i class="zmdi zmdi-eye"></i>
-						</a>
-					</div>
-				</div>
-				<div class="product-content text-center text-uppercase">
-					<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">'.substr($row[0], 0, 25).'.</a>
-					<div class="rating-icon">
-						'.$_stock.'
-					</div>
-					<div class="product-price">
-						<span class="new-price">$ '.$precio.' MXN</span>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		
-		
-		
+			$body = $body.'
+			
+			<tr>
+				<td class="product-thumbnail"><img src="../images/'.$row[5].'" alt="" height="110" width="110"></td>
+				
+				<td class="text-center">'.$row[0].'</td>
+				
+				<td class="text-center">$ '.number_format($precio,GetNumberDecimales(),".",",").'</td>
+				
+				<td class="text-center">
+					<a class="button small button-primary mb-20" data-toggle="modal" data-target="#add_car'.$row[9].'"><i class="zmdi zmdi-plus-circle-o-duplicate"></i></a>
+				</td>
+			</tr>
 		';
 		}
+		$body = $body . '
+		</tbody>
+			</table>
+		</div>';
+		
 		$body = $body . $pagination;
+
 		return $body;
 	}
 
@@ -1954,7 +2023,13 @@
 
 	function _getProducts_saleSearch ($txt, $folio, $pagina)
 	{
-		$TAMANO_PAGINA = 16;
+		$login = false;
+		$icons_edit = "";
+
+		if (isset($_SESSION['users_id'])){ $login = true;}
+		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
+
+		$TAMANO_PAGINA = 5;
 
 		if (!$pagina) {
 			$inicio = 0;
@@ -1963,20 +2038,15 @@
 		else {
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
-
-		$c = "( " . str_replace("almacen","p.almacen",substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2)) . " )";
-			$c_s = str_replace("p.almacen","s.almacen",$c);
-		    $c_p = str_replace("p.almacen","p.almacen",$c);
-			
-			$data = mysqli_query(db_conectar(),"
+		
+		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
+		$c_s = str_replace("almacen","s.almacen",$c);
+		$c_p = str_replace("almacen","p.almacen",$c);
+		
+        $data = mysqli_query(db_conectar(),"
 			SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.descripcion, p.`tiempo de entrega`, p.`no. De parte`, a.nombre, d.nombre, p.marca, p.loc_almacen FROM productos p, almacen a, departamentos d where 
 
 			p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
@@ -1994,45 +2064,21 @@
 			p.almacen = a.id and p.departamento = d.id and p.`no. De parte` like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			LIMIT $inicio, $TAMANO_PAGINA");
-
-
-			$datatmp = mysqli_query(db_conectar(),"
-			SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.descripcion, p.`tiempo de entrega`, p.`no. De parte`, a.nombre, d.nombre, p.marca, p.loc_almacen FROM productos p, almacen a, departamentos d where 
-
-			p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
-			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
-			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)");
-
+        
+        
 		$pagination = '<div class="row">
 						<div class="col-md-12">
 						<div class="shop-pagination p-10 text-center">
 							<ul>';
 
 		
-		$num_total_registros = mysqli_num_rows($datatmp);
+		$num_total_registros = 1;
 		$total_paginas = ceil($num_total_registros / $TAMANO_PAGINA);
 
 		if ($pagina > 1)
 		{
-			$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.($pagina - 1 ).'"><i class="zmdi zmdi-chevron-left"></i></a></li>';
+			$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.($pagina - 1 ).'"><i class="zmdi zmdi-chevron-left"></i></a></li>';
 		}
 		
 		
@@ -2042,13 +2088,13 @@
 			{
 				for ($i=1; $i<$pagina; $i++) {
 				
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
 				}
 			}else
 			{
 				for ($i= ($pagina - 7); $i < $pagina; $i++) {
 				
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
 				}
 			}
 			
@@ -2061,22 +2107,21 @@
 			for ($i=$pagina;$i<=$total_paginas;$i++) {
 				
 				if ( $i == $pagina)
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'"><b>'.$i.'</b></a></li>';
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'"><b>'.$i.'</b></a></li>';
 				elseif ( $i < $Pag_Max)
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';
 			}
 		}
 
 		if ($pagina < $total_paginas)
 		{
-			$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.($pagina + 1 ).'" ><i class="zmdi zmdi-chevron-right"></i></a></li>';
+			$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.($pagina + 1 ).'" ><i class="zmdi zmdi-chevron-right"></i></a></li>';
 		}
 		
 		$pagination = $pagination . '</ul>
 									</div>
 									</div>
 									</div><p>';
-									
 		$body = '<div class="row">
 		<div class="col-md-12">
 		<div class="section-title-2 text-uppercase mb-40 text-center">
@@ -2087,7 +2132,7 @@
 		<div class="col-md-8">
 			<form class="header-search-box" action="sale.php">
 			<div>
-				<input type="text" placeholder="Buscar" name="search" autocomplete="off" value="'.$txt.'">
+				<input type="text" placeholder="Buscar" name="search" autocomplete="off">
 				<input type="hidden" id="folio" name="folio" value="'.$folio.'">
 				<input type="hidden" id="pagina" name="pagina" value="1">
 			</div>
@@ -2098,71 +2143,76 @@
 			<a href="#" title="Agregar producto generico" data-toggle="modal" data-target="#add_car_generic">
 				<button class="submit-btn" type="submit">+ Producto generico</button>
 			</a>
-			<br><br><br><br>
 			</form>
 		</div>
-	</div>
+	</div>';
+		$body = $body . $pagination;
 
-	'.$pagination.'
-
-	';
-		
+		$body = $body.'
+		<div class="wishlist-area" style="background-color: #f5f5f5;">
+		<div class="container">
+		<div class="row">
+		<div class="col-md-12">
+			<div class="wishlist-content">
+			<div class="wishlist-table table-responsive p-30 text-uppercase">
+				<table>
+					<thead>
+						<tr>
+							<th class="product-thumbnail">IMAGEN</th>
+							<th class="product-name text-center"><span class="nobr">Producto</span></th>
+							<th class="product-prices text-center"><span class="nobr">PRECIO </span></th>
+							<th class="product-prices text-center"><span class="nobr">Agregar</span></th>
+						</tr>
+					</thead>
+					<tbody>
+		';
 
 		while($row = mysqli_fetch_array($data))
 	    {
-		  $precio = $row[3];
+		  	$precio = $row[3];
 			$msg_oferta = "";
-			$_stock = '<p>PN: '.$row[12].'</p>';
+			$_stock = '<p>PN: '.$row[10].'</p>';
 
 			if ($row[2] == 1)
 			{
 				$precio = $row[4];
 				$msg_oferta = '<span class="new-label red-color text-uppercase">off</span>';
-				$_stock = '<p>PN: '.$row[12].'  | Antes $ '.$row[3].' MXN</p>';
+				$_stock = '<p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</p>';
 			}
 
-	        $body = $body.'<div class="col-md-3">
-                                    
-			<div class="single-product mb-40">
-				<div class="product-img-content mb-20">
-					<div class="product-img">
-						<a href="/products_detail.php?id='.$row[9].'">
-							<img src="../images/'.$row[5].'" alt="" style="max-height: 180px; min-height: 180px;">
-						</a>
-					</div>
-					'.$msg_oferta.'
-					<div class="product-action text-center">
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">
-							<i class="zmdi zmdi-shopping-cart"></i>
-						</a>
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#viewM'.$row[9].'">
-							<i class="zmdi zmdi-eye"></i>
-						</a>
-					</div>
-				</div>
-				<div class="product-content text-center text-uppercase">
-					<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">'.substr($row[0], 0, 25).'.</a>
-					<div class="rating-icon">
-						'.$_stock.'
-					</div>
-					<div class="product-price">
-						<span class="new-price">$ '.$precio.' MXN</span>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		
-		
-		
+			$body = $body.'
+			
+			<tr>
+				<td class="product-thumbnail"><img src="../images/'.$row[5].'" alt="" height="110" width="110"></td>
+				
+				<td class="text-center">'.$row[0].'</td>
+				
+				<td class="text-center">$ '.number_format($precio,GetNumberDecimales(),".",",").'</td>
+				
+				<td class="text-center">
+				<a class="button small button-primary mb-20" data-toggle="modal" data-target="#add_car'.$row[9].'"><i class="zmdi zmdi-plus-circle-o-duplicate"></i></a>
+				</td>
+			</tr>
 		';
 		}
+		$body = $body . '
+		</tbody>
+			</table>
+		</div>';
+		
 		$body = $body . $pagination;
+
 		return $body;
 	}
 
 	function _getProducts_CotSearch ($txt, $folio, $pagina)
 	{
+		$login = false;
+		$icons_edit = "";
+
+		if (isset($_SESSION['users_id'])){ $login = true;}
+		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
+
 		$TAMANO_PAGINA = 16;
 
 		if (!$pagina) {
@@ -2172,20 +2222,15 @@
 		else {
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
-
-		$c = "(" . str_replace("almacen","p.almacen",substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2)) . " )";
-		$c_s = str_replace("p.almacen","s.almacen",$c);
-		$c_p = str_replace("p.almacen","p.almacen",$c);
-
-		$data = mysqli_query(db_conectar(),"
+		
+		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
+		$c_s = str_replace("almacen","s.almacen",$c);
+		$c_p = str_replace("almacen","p.almacen",$c);
+		
+        $data = mysqli_query(db_conectar(),"
 		SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.descripcion, p.`tiempo de entrega`, p.`no. De parte`, a.nombre, d.nombre, p.marca, p.loc_almacen FROM productos p, almacen a, departamentos d where 
 
 		p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		or
-		p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
 		( 
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 		)
@@ -2203,33 +2248,8 @@
 		p.almacen = a.id and p.departamento = d.id and p.`no. De parte` like '%$txt%' and 
 		( 
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		LIMIT $inicio, $TAMANO_PAGINA");
-
-
-		$datatmp = mysqli_query(db_conectar(),"
-		SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.descripcion, p.`tiempo de entrega`, p.`no. De parte`, a.nombre, d.nombre, p.marca, p.loc_almacen FROM productos p, almacen a, departamentos d where 
-
-		p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		or
-		p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		or
-		p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		or
-		p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 		)");
-
+		
 		$pagination = '<div class="row">
 						<div class="col-md-12">
 						<div class="shop-pagination p-10 text-center">
@@ -2241,7 +2261,7 @@
 
 		if ($pagina > 1)
 		{
-			$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.($pagina - 1 ).'"><i class="zmdi zmdi-chevron-left"></i></a></li>';
+			$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.($pagina - 1 ).'"><i class="zmdi zmdi-chevron-left"></i></a></li>';
 		}
 		
 		
@@ -2251,13 +2271,13 @@
 			{
 				for ($i=1; $i<$pagina; $i++) {
 				
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
 				}
 			}else
 			{
 				for ($i= ($pagina - 7); $i < $pagina; $i++) {
 				
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';	
 				}
 			}
 			
@@ -2270,102 +2290,101 @@
 			for ($i=$pagina;$i<=$total_paginas;$i++) {
 				
 				if ( $i == $pagina)
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'"><b>'.$i.'</b></a></li>';
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'"><b>'.$i.'</b></a></li>';
 				elseif ( $i < $Pag_Max)
-					$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';
+					$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.$i.'">'.$i.'</a></li>';
 			}
 		}
 
 		if ($pagina < $total_paginas)
 		{
-			$pagination = $pagination . '<li><a href="?search='.$txt.'&folio='.$folio.'&pagina='.($pagina + 1 ).'" ><i class="zmdi zmdi-chevron-right"></i></a></li>';
+			$pagination = $pagination . '<li><a href="?folio='.$folio.'&pagina='.($pagina + 1 ).'" ><i class="zmdi zmdi-chevron-right"></i></a></li>';
 		}
 		
 		$pagination = $pagination . '</ul>
 									</div>
 									</div>
 									</div><p>';
-
-
-
 		$body = '<div class="row">
 		<div class="col-md-12">
 		<div class="section-title-2 text-uppercase mb-40 text-center">
-			<h4>AGREGUE PRODUCTOS A SU COTIZACION: '.$folio.'</h4>
+		<h4>AGREGUE PRODUCTOS A SU VENTA: '.$folio.'</h4>
 		</div>
 	</div>
 	<div class="col-md-12">
-		<div class="col-md-8 text-right">
-			<form class="header-search-box" action="sale_cot.php">
+		<div class="col-md-8">
+			<form class="header-search-box" action="sale.php">
 			<div>
-				<input type="text" placeholder="Buscar" name="search" autocomplete="off" value = "'.$txt.'">
+				<input type="text" placeholder="Buscar" name="search" autocomplete="off">
 				<input type="hidden" id="folio" name="folio" value="'.$folio.'">
+				<input type="hidden" id="pagina" name="pagina" value="1">
 			</div>
 			
 		</div>
-		<div class="col-md-4 text-center">
+		<div class="col-md-4">
 			<button class="submit-btn" type="submit">Buscar</button>
 			<a href="#" title="Agregar producto generico" data-toggle="modal" data-target="#add_car_generic">
 				<button class="submit-btn" type="submit">+ Producto generico</button>
 			</a>
 			</form>
 		</div>
-	</div>
-</div>
-'.$pagination.'
-';
-		
+	</div>';
+		$body = $body . $pagination;
+
+		$body = $body.'
+		<div class="wishlist-area" style="background-color: #f5f5f5;">
+		<div class="container">
+		<div class="row">
+		<div class="col-md-12">
+			<div class="wishlist-content">
+			<div class="wishlist-table table-responsive p-30 text-uppercase">
+				<table>
+					<thead>
+						<tr>
+							<th class="product-thumbnail">IMAGEN</th>
+							<th class="product-name text-center"><span class="nobr">Producto</span></th>
+							<th class="product-prices text-center"><span class="nobr">PRECIO </span></th>
+							<th class="product-prices text-center"><span class="nobr">Agregar</span></th>
+						</tr>
+					</thead>
+					<tbody>
+		';
 
 		while($row = mysqli_fetch_array($data))
 	    {
-		  $precio = $row[3];
+		  	$precio = $row[3];
 			$msg_oferta = "";
-			$_stock = '<p>PN: '.$row[12].'</p>';
+			$_stock = '<p>PN: '.$row[10].'</p>';
 
 			if ($row[2] == 1)
 			{
 				$precio = $row[4];
 				$msg_oferta = '<span class="new-label red-color text-uppercase">off</span>';
-				$_stock = '<p>PN: '.$row[12].'  | Antes $ '.$row[3].' MXN</p>';
+				$_stock = '<p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</p>';
 			}
 
-	        $body = $body.'<div class="col-md-3">
-                                    
-			<div class="single-product mb-40">
-				<div class="product-img-content mb-20">
-					<div class="product-img">
-						<a href="/products_detail.php?id='.$row[9].'">
-							<img src="../images/'.$row[5].'" alt="" style="max-height: 180px; min-height: 180px;">
-						</a>
-					</div>
-					'.$msg_oferta.'
-					<div class="product-action text-center">
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">
-							<i class="zmdi zmdi-shopping-cart"></i>
-						</a>
-						<a href="#" title="Ver detalles" data-toggle="modal" data-target="#viewM'.$row[9].'">
-							<i class="zmdi zmdi-eye"></i>
-						</a>
-					</div>
-				</div>
-				<div class="product-content text-center text-uppercase">
-					<a href="#" title="Ver detalles" data-toggle="modal" data-target="#add_car'.$row[9].'">'.substr($row[0], 0, 25).'.</a>
-					<div class="rating-icon">
-						'.$_stock.'
-					</div>
-					<div class="product-price">
-						<span class="new-price">$ '.$precio.' MXN</span>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		
-		
-		
+			$body = $body.'
+			
+			<tr>
+				<td class="product-thumbnail"><img src="../images/'.$row[5].'" alt="" height="110" width="110"></td>
+				
+				<td class="text-center">'.$row[0].'</td>
+				
+				<td class="text-center">$ '.number_format($precio,GetNumberDecimales(),".",",").'</td>
+				
+				<td class="text-center">
+					<a class="button small button-primary mb-20" data-toggle="modal" data-target="#add_car'.$row[9].'"><i class="zmdi zmdi-plus-circle-o-duplicate"></i></a>
+				</td>
+			</tr>
 		';
 		}
+		$body = $body . '
+		</tbody>
+			</table>
+		</div>';
+		
 		$body = $body . $pagination;
+
 		return $body;
 	}
 
@@ -2807,11 +2826,6 @@
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
@@ -3124,13 +3138,13 @@
 
 		  $precio = $row[3];
 			$msg_oferta = "";
-			$_stock = '<p>PN: '.$row[12].'</p>';
+			$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[12].'</p></a>';
 
 			if ($row[2] == 1)
 			{
 				$precio = $row[4];
 				$msg_oferta = '<span class="new-label red-color text-uppercase">off</span>';
-				$_stock = '<p>PN: '.$row[12].'  | Antes $ '.$row[3].' MXN</p>';
+				$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[12].'  | Antes $ '.$row[3].' MXN</a></p>';
 			}
 
 	        $body = $body.'<div class="col-md-3">
@@ -3281,13 +3295,13 @@
 
 		  $precio = $row[3];
 			$msg_oferta = "";
-			$_stock = '<p>PN: '.$row[10].'</p>';
+			$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[10].'</p></a>';
 
 			if ($row[2] == 1)
 			{
 				$precio = $row[4];
 				$msg_oferta = '<span class="new-label red-color text-uppercase">off</span>';
-				$_stock = '<p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</p>';
+				$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[10].'  | Antes $ '.$row[3].' MXN</a></p>';
 			}
 
 	        $body = $body.'<div class="col-md-3">
@@ -3361,11 +3375,6 @@
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
@@ -3391,11 +3400,6 @@
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
@@ -3417,8 +3421,6 @@
 
 			p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' 
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' 
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' 
 			or
 			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%'
@@ -3431,8 +3433,6 @@
 			SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.descripcion, p.`tiempo de entrega`, p.`no. De parte`, a.nombre, d.nombre, p.marca, p.loc_almacen FROM productos p, almacen a, departamentos d where 
 
 			p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' 
-			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' 
 			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' 
 			or
@@ -3530,13 +3530,13 @@
 
 		    $precio = $row[3];
 			$msg_oferta = "";
-			$_stock = '<p>PN: '.$row[12].'</p>';
+			$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[12].'</p></a>';
 
 			if ($row[2] == 1)
 			{
 				$precio = $row[4];
 				$msg_oferta = '<span class="new-label red-color text-uppercase">off</span>';
-				$_stock = '<p>PN: '.$row[12].'  | Antes $ '.$row[3].' MXN</p>';
+				$_stock = '<a href="/products_vendidos.php?id='.$row[9].'&desde='.date("Y-m-d").'&hasta='.date("Y-m-d").'"><p>PN: '.$row[12].'  | Antes $ '.$row[3].' MXN</a></p>';
 			}
 
 	        $body = $body.'<div class="col-md-3">
@@ -3723,12 +3723,12 @@
                   
 	              <div class="col-md-4">
 	                <label>Numero de parte</label>
-	                <input type="text" name="parte" id="parte" placeholder="AEF594-S" value='.$row[0].'>
+					<textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="parte" id="parte">'.$row[0].'</textarea>
 	              </div>
                   
 	              <div class="col-md-4">
 	                <label>Nombre del producto</label>
-	                <input type="text" name="name" id="name" placeholder="Nombre producto" value="'.$row[1].'">
+					<textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="name" id="name">'.$row[1].'</textarea>
 	              </div>
                   
                   <div class="col-md-4">
@@ -4237,11 +4237,11 @@
 
 	              <div class="col-md-6">
 	                <label>Numero de parte</label>
-	                <input type="text" name="parte" id="parte" placeholder="AEF594-S" value='.$row[10].'>
+					<textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="parte" id="parte">'.$row[10].'</textarea>
 	              </div>
 	              <div class="col-md-6">
 	                <label>Nombre del producto</label>
-	                <input type="text" name="name" id="name" placeholder="Nombre producto" value="'.$row[0].'">
+					<textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="name" id="name">'.$row[0].'</textarea>
 	              </div>
 	              
 	              <div class="col-md-6">
@@ -4283,7 +4283,7 @@
 
 	function _getProductsModal_sale ($pagina, $folio)
 	{
-		$TAMANO_PAGINA = 16;
+		$TAMANO_PAGINA = 5;
 
 		if (!$pagina) {
 			$inicio = 0;
@@ -4297,6 +4297,8 @@
 		$c = substr(GetFilterAlmacen($_SESSION['sucursal']), 0, -2);
 		$c_s = str_replace("almacen","s.almacen",$c);
 		$c_p = str_replace("almacen","p.almacen",$c);
+		
+		
 		$data = mysqli_query(db_conectar(),"SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.`no. De parte`, p.descripcion, d.nombre, p.marca, p.loc_almacen, p.`tiempo de entrega`, a.nombre, p.pedir_medidas FROM productos p, departamentos d, almacen a where p.departamento = d.id and p.almacen = a.id AND (SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and ( $c_s ) ) > 0 or p.departamento = d.id and p.almacen = a.id AND ( $c_p ) order by p.id desc LIMIT $inicio, $TAMANO_PAGINA");
 		$datatmp = mysqli_query(db_conectar(),"SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.`no. De parte`, p.descripcion, d.nombre, p.marca, p.loc_almacen, p.`tiempo de entrega`, a.nombre, p.pedir_medidas FROM productos p, departamentos d, almacen a where p.departamento = d.id and p.almacen = a.id AND (SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and ( $c_s ) ) > 0 or p.departamento = d.id and p.almacen = a.id AND ( $c_p )");
 
@@ -5639,7 +5641,7 @@
 
 	function _getProductsModal_sale_search ($txt, $folio, $pagina)
 	{
-		$TAMANO_PAGINA = 16;
+		$TAMANO_PAGINA = 5;
 
 		if (!$pagina) {
 			$inicio = 0;
@@ -5662,11 +5664,6 @@
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 		)
 		or
-		p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		or
 		p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 		( 
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
@@ -5681,7 +5678,7 @@
 		( 
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 		)
-		LIMIT $inicio, $TAMANO_PAGINA");
+		");
         
 		$con_hijos  = db_conectar();
 
@@ -6709,11 +6706,6 @@
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 		)
 		or
-		p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-		( 
-				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-		)
-		or
 		p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 		( 
 				$c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
@@ -7141,11 +7133,11 @@
 
 	              <div class="col-md-6">
 	                <label>Numero de parte</label>
-	                <input type="text" name="parte" id="parte" placeholder="AEF594-S" value='.$row[12].'>
+	                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="parte" id="parte">'.$row[12].'</textarea>
 	              </div>
 	              <div class="col-md-6">
 	                <label>Nombre del producto</label>
-	                <input type="text" name="name" id="name" placeholder="Nombre producto" value="'.$row[0].'">
+					<textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="name" id="name">'.$row[0].'</textarea>
 	              </div>
 	              
 	              <div class="col-md-6">
@@ -7213,17 +7205,17 @@
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
 			or
 			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%' and 
+			( 
+				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
+			)
+			or
+			p.almacen = a.id and p.departamento = d.id and p.`no. De parte` like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
@@ -7237,11 +7229,6 @@
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
 			)
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' and 
-			( 
-				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			)
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
@@ -7250,7 +7237,11 @@
 			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%' and 
 			( 
 				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
-			) ");
+			)or
+			p.almacen = a.id and p.departamento = d.id and p.`no. De parte` like '%$txt%' and 
+			( 
+				 $c_p or ( SELECT COUNT(s.id) as id  FROM productos_sub s WHERE s.padre = p.id and $c_s ) > 0  
+			)");
 		}else 
 		{
 			$data = mysqli_query(db_conectar(),"
@@ -7258,23 +7249,24 @@
 
 			p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' 
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' 
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' 
 			or
-			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%' 
+			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%'
+			or
+			p.almacen = a.id and p.departamento = d.id and p.`no. De parte` like '%$txt%' 
 			LIMIT $inicio, $TAMANO_PAGINA");
+			
 			
 			$datatmp = mysqli_query(db_conectar(),"
 			SELECT p.nombre, p.stock, p.oferta, p.precio_normal, p.precio_oferta, p.foto0, p.foto1, p.foto2, p.foto3, p.id, p.descripcion, p.`tiempo de entrega`, p.`no. De parte`, a.nombre, d.nombre, p.marca, p.loc_almacen FROM productos p, almacen a, departamentos d where 
 
 			p.almacen = a.id and p.departamento = d.id and p.nombre like '%$txt%' 
 			or
-			p.almacen = a.id and p.departamento = d.id and p.descripcion like '%$txt%' 
-			or
 			p.almacen = a.id and p.departamento = d.id and p.marca like '%$txt%' 
 			or
-			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%' ");
+			p.almacen = a.id and p.departamento = d.id and p.proveedor like '%$txt%'
+			or
+			p.almacen = a.id and p.departamento = d.id and p.`no. De parte` like '%$txt%' ");
 		}
 
 		$con_hijos  = db_conectar();
@@ -7421,11 +7413,11 @@
 
 	              <div class="col-md-6">
 	                <label>Numero de parte</label>
-	                <input type="text" name="parte" id="parte" placeholder="AEF594-S" value='.$row[12].'>
+	                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="parte" id="parte">'.$row[12].'</textarea>
 	              </div>
 	              <div class="col-md-6">
 	                <label>Nombre del producto</label>
-	                <input type="text" name="name" id="name" placeholder="Nombre producto" value="'.$row[0].'">
+	                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="name" id="name">'.$row[0].'</textarea>
 	              </div>
 	              
 	              <div class="col-md-6">
@@ -7646,11 +7638,11 @@
 
 	              <div class="col-md-6">
 	                <label>Numero de parte</label>
-	                <input type="text" name="parte" id="parte" placeholder="AEF594-S" value='.$row[12].'>
+	                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="parte" id="parte">'.$row[10].'</textarea>
 	              </div>
 	              <div class="col-md-6">
 	                <label>Nombre del producto</label>
-	                <input type="text" name="name" id="name" placeholder="Nombre producto" value="'.$row[0].'">
+	                <textarea cols="30" rows="1" style="background-color: white; height: 37px; white-space: nowrap; overflow: hidden;resize: none;" name="name" id="name">'.$row[0].'</textarea>
 	              </div>
 	              
 	              <div class="col-md-6">
@@ -7943,6 +7935,40 @@
 		}
 	}
 
+	function Product_validarExistencias ($folio)
+	{
+		$r = "";
+
+		$product_venta = mysqli_query(db_conectar(),"SELECT product, unidades FROM `product_venta` WHERE folio_venta = '$folio';");
+		
+		while($row = mysqli_fetch_array($product_venta))
+	    {
+			if ($row[1] > ProductStock($row[0]))
+			{
+				$r .= $row[0] . ",";
+			}
+		}
+		
+		return $r;
+	}
+
+	function Product_validarExistenciasPedido ($folio)
+	{
+		$r = "";
+
+		$product_venta = mysqli_query(db_conectar(),"SELECT product, unidades FROM `product_pedido` WHERE folio_venta = '$folio';");
+		
+		while($row = mysqli_fetch_array($product_venta))
+	    {
+			if ($row[1] > ProductStock($row[0]))
+			{
+				$r .= $row[0] . ",";
+			}
+		}
+		
+		return $r;
+	}
+	
 	function ProductVentaStock_SaleUnidad ($id, $unidades)
 	{
 		$data = mysqli_query(db_conectar(),"SELECT p.stock FROM product_venta v, productos p WHERE v.product = p.id and v.id = '$id' ");
@@ -8053,8 +8079,31 @@
 			$iva = $row[4];
 		}
 
+		if (isset($_GET["error"]))
+		{
+			$ids = explode(",", $_GET["error"]);
+		}else
+		{
+			$_GET["error"] = Product_validarExistencias($folio);
+			$ids = explode(",", $_GET["error"]);
+		}	
+
 		while($row = mysqli_fetch_array($data))
 	    {
+			$styleError = 'style="text-align:center;"';
+
+			if (isset($_GET["error"]))
+			{
+				foreach ($ids as $r) {
+					if ($r == $row[6])
+					{
+						$styleError = 'style="text-align:center; color: red; border: 3px solid red;"';
+						break;
+					}
+				}
+			}
+
+			
 			$total = $total + ($row[2] * $row[0]);
 			$total_productos = $total_productos + $row[0];
             
@@ -8092,7 +8141,7 @@
 				<div class="col-md-12">
 					<div class="col-md-8">
 					<input type="hidden" id="url" name="url" value="'.$_SERVER['REQUEST_URI'].'">
-					<input type="number" step="1" name="unidades" id="unidades" min="1"  value="'.$row[0].'" style="text-align:center;">
+					<input type="number" step="1" name="unidades" id="unidades" min="1"  max ="'.$row[9].'" value="'.$row[0].'" '.$styleError.'>
 					</div>
 					<div class="col-md-4">
 					<button type="submit" class="btn btn-primary"><i class="zmdi zmdi-upload"></i></button>
@@ -8505,6 +8554,17 @@
 			$iva = $row[4];
 		}
 
+		echo Product_validarExistenciasPedido($folio);
+
+		if (isset($_GET["error"]))
+		{
+			$ids = explode(",", $_GET["error"]);
+		}else
+		{
+			$_GET["error"] = Product_validarExistenciasPedido($folio);
+			$ids = explode(",", $_GET["error"]);
+		}	
+
 		while($row = mysqli_fetch_array($abonos))
 		{
 			$pagos .= '<p>$ '.$row[1].' MXN - '.$row[2].'</p>';
@@ -8514,6 +8574,19 @@
 		
 		while($row = mysqli_fetch_array($data))
 	    {
+			$styleError = 'style="text-align:center;"';
+
+			if (isset($_GET["error"]))
+			{
+				foreach ($ids as $r) {
+					if ($r == $row[6])
+					{
+						$styleError = 'style="text-align:center; color: red; border: 3px solid red;"';
+						break;
+					}
+				}
+			}
+
 			if ($_SESSION['super_pedidos'] == 1)
 			{
 				$unidades_update = '
@@ -8522,7 +8595,7 @@
 				<div class="col-md-12">
 					<div class="col-md-8">
 					<input type="hidden" id="url" name="url" value="'.$_SERVER['REQUEST_URI'].'">
-					<input type="number" name="unidades" id="unidades" min="1" value="'.$row[0].'" style="text-align:center;">
+					<input type="number" name="unidades" id="unidades" min="1" value="'.$row[0].'" '.$styleError.'>
 					</div>
 					<div class="col-md-4">
 					<button type="submit" class="btn btn-primary"><i class="zmdi zmdi-upload"></i></button>
@@ -9172,8 +9245,30 @@
 			$iva = $row[4];
 		}
 
+		if (isset($_GET["error"]))
+		{
+			$ids = explode(",", $_GET["error"]);
+		}else
+		{
+			$_GET["error"] = Product_validarExistencias($folio);
+			$ids = explode(",", $_GET["error"]);
+		}	
+
 		while($row = mysqli_fetch_array($data))
 	    {
+			$styleError = 'style="text-align:center;"';
+
+			if (isset($_GET["error"]))
+			{
+				foreach ($ids as $r) {
+					if ($r == $row[6])
+					{
+						$styleError = 'style="text-align:center; color: red; border: 3px solid red;"';
+						break;
+					}
+				}
+			}
+
 			$total = $total + ($row[2] * $row[0]);
 			$total_productos = $total_productos + $row[0];
 
@@ -9215,7 +9310,7 @@
 				<div class="col-md-12">
 					<div class="col-md-8">
 					<input type="hidden" id="url" name="url" value="'.$_SERVER['REQUEST_URI'].'">
-					<input type="number" name="unidades" id="unidades" min="1"  value="'.$row[0].'" style="text-align:center;">
+					<input type="number" step="1" name="unidades" id="unidades" min="1" value="'.$row[0].'" '.$styleError.'>
 					</div>
 					<div class="col-md-4">
 					<button type="submit" class="btn btn-primary"><i class="zmdi zmdi-upload"></i></button>
@@ -15169,6 +15264,8 @@
 
 	function g_orden_compra_todos ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$con = db_conectar();
 		
 		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id  ORDER by p.nombre asc");
@@ -15382,6 +15479,8 @@
 
 	function g_orden_compra_almacen ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$almacen0 = $almacen;
 
 		$con = db_conectar();
@@ -15655,6 +15754,8 @@
 
 	function g_orden_compra_marca ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$con = db_conectar();
 		
 		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.marca like '%$marca%' ORDER by p.nombre asc");
@@ -15865,9 +15966,14 @@
 
 	function g_orden_compra_proveedor ($almacen, $marca, $proveedor)
 	{
-		$con = db_conectar();
+		$proveedor = str_replace(" ","",$proveedor);
 		
-		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.proveedor like '%$proveedor%' ORDER by p.nombre asc");
+		$con = db_conectar();
+
+		$proveedor = str_replace(" ","",$proveedor);
+		
+		
+		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND replace(p.proveedor, ' ', '') like '%$proveedor%' ORDER by p.nombre asc");
 		
 		if (!$marca)
 		{
@@ -16075,6 +16181,8 @@
 
 	function g_orden_compra_AlmacenMarca ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$almacen0 = $almacen;
 
 		$con = db_conectar();
@@ -16348,11 +16456,13 @@
 
 	function g_orden_compra_AlmacenProveedor ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$almacen0 = $almacen;
 
 		$con = db_conectar();
 		
-		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.almacen = '$almacen' AND  p.proveedor like '%$proveedor%' ORDER by p.nombre asc");
+		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.almacen = '$almacen' AND  replace(p.proveedor, ' ', '') like '%$proveedor%' ORDER by p.nombre asc");
 		
 		if (!$marca)
 		{
@@ -16621,11 +16731,13 @@
 
 	function g_orden_compra_MarcaProveedor ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$almacen0 = $almacen;
 
 		$con = db_conectar();
 		
-		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.marca like '%$marca%' AND  p.proveedor like '%$proveedor%' ORDER by p.nombre asc");
+		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.marca like '%$marca%' AND  replace(p.proveedor, ' ', '') like '%$proveedor%' ORDER by p.nombre asc");
 		
 		if (!$marca)
 		{
@@ -16894,11 +17006,13 @@
 
 	function g_orden_compra_AlmacenMarcaProveedor ($almacen, $marca, $proveedor)
 	{
+		$proveedor = str_replace(" ","",$proveedor);
+		
 		$almacen0 = $almacen;
 
 		$con = db_conectar();
 		
-		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.marca like '%$marca%' AND  p.proveedor like '%$proveedor%' and p.almacen = $almacen ORDER by p.nombre asc");
+		$data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.stock_min, p.stock_max, p.stock, p.proveedor, p.marca, a.nombre ,p.loc_almacen, a.id, p.foto0, p.precio_costo FROM productos p, almacen a where p.stock_min >= p.stock  and p.stock_max > p.stock and p.almacen = a.id AND p.marca like '%$marca%' AND  replace(p.proveedor, ' ', '') like '%$proveedor%' and p.almacen = $almacen ORDER by p.nombre asc");
 		
 		if (!$marca)
 		{
@@ -18066,7 +18180,7 @@
 
 	function table_cotizacion_modal ($pagina)
 	{
-		$TAMANO_PAGINA = 7;
+		$TAMANO_PAGINA = 16;
 
 		if (!$pagina) {
 			$inicio = 0;
@@ -19350,6 +19464,7 @@
 
 	function table_SalesModal ($folio)
 	{
+		
 		$data = mysqli_query(db_conectar(),"SELECT v.id, p.nombre FROM product_venta v, productos p WHERE  v.product = p.id and folio_venta = '$folio' ");
 		$gen = mysqli_query(db_conectar(),"SELECT v.id, v.p_generico FROM product_venta v WHERE v.p_generico != '' and folio_venta = '$folio' ");
 
@@ -22901,14 +23016,38 @@
 			</html>
         ';
 		
-		$mail_receptor = static_empresa_email_responder();
+		require mail_phpmailer;
+    
+        //Create a new PHPMailer instance
+        $mail = new PHPMailer;
+        //Tell PHPMailer to use SMTP
         
-        $cabecera = "From: DTPL"."\r\n";
-		$cabecera .= "Reply-To: ".static_empresa_email_responder()."\r\n";
-		$cabecera .= "Content-type: text/html;  charset=utf-8";
-		$asunto = 'Venta Registrada Con exito';
+        $mail->isSMTP();
+        $mail->SMTPDebug = mail_debug;
+        $mail->Host = mail_smtp;
+        $mail->Port = mail_port;
+        $mail->SMTPSecure = 'tls';
+        $mail->SMTPAuth = true;
+        
+        $mail->Username = mail_username;
+        $mail->Password = mail_password;
+        $mail->setFrom(static_empresa_email(), static_empresa_nombre() );
+		$mail->AddReplyTo(static_empresa_email(), static_empresa_nombre() );
 		
-		mail($mail_receptor, $asunto, $formato,$cabecera);
+		$ArrMail = explode(",",$correo);
+        
+        foreach ($ArrMail as $valor) {
+            $mail->addAddress($valor);
+        }
+        
+        //Asunto
+        $mail->Subject = 'Venta Registrada Con exito';
+      
+        $mail->msgHTML(file_get_contents($formato), __DIR__);
+        //Replace the plain text body with one created manually  
+        $mail->Body = $formato;
+        
+        $mail->send();
         
     }    
     
@@ -23019,21 +23158,21 @@
     
     function MailConfig ()
     {
-        require '../phpmailer/PHPMailerAutoload.php';
+        require mail_phpmailer;
     
         //Create a new PHPMailer instance
         $mail = new PHPMailer;
         //Tell PHPMailer to use SMTP
         
         $mail->isSMTP();
-        //$mail->SMTPDebug = 2;
-        $mail->Host = 'smtp.gmail.com';
-        $mail->Port = 587;
+        $mail->SMTPDebug = mail_debug;
+        $mail->Host = mail_smtp;
+        $mail->Port = mail_port;
         $mail->SMTPSecure = 'tls';
         $mail->SMTPAuth = true;
         
-        $mail->Username = "documentos@cyberchoapas.com";
-        $mail->Password = "8b19e87ff57efaace42006fb1d6ba6c8";
+        $mail->Username = mail_username;
+        $mail->Password = mail_password;
         $mail->setFrom(static_empresa_email(), static_empresa_nombre() );
 		$mail->AddReplyTo(static_empresa_email(), static_empresa_nombre() );
 		return $mail;
@@ -23463,6 +23602,805 @@
 		</div>
 		';
 
+		return $r;
+	}
+
+	function producto_vendidos ($desde, $hasta, $id)
+	{
+		$con = db_conectar();
+		
+		//$inicio = '2018-07-18 00:00:00';
+		//$finaliza = '2018-07-18 23:59:59';
+		$inicio_old = $desde;
+		$desde = $inicio_old . ' 00:00:00';
+		
+		$finaliza_old = $hasta;
+		$hasta = $finaliza_old . ' 23:59:59';
+
+		$ventas_total = 0; $imagen = ""; $parte = ""; $nombre = "";
+		
+		$data = mysqli_query($con,"SELECT v.id, p.nombre, (select sum(v2.unidades) from producto_vendidos v2 WHERE v2.producto = $id and v2.producto = v.producto and v2.fecha >= '$desde' and v2.fecha <= '$hasta' ) as unidades, p.foto0, p.`no. De parte`, p.precio_normal, (p.precio_normal * unidades) as total, p.precio_costo FROM producto_vendidos v, productos p WHERE v.producto = p.id and v.fecha >= '$desde' and v.producto = $id and  v.fecha <= '$hasta' GROUP by v.producto ORDER by p.nombre asc");
+		
+		if($row = mysqli_fetch_array($data)) 
+		{ 
+			$total_unitario = $total_unitario + $row[5];
+			$total_total = $total_total + $row[6];
+		
+			if ($row[0] > 0) { $ventas_total = $row[0];  }
+
+			$nombre = $row[1]; 
+			$parte = $row[2]; 
+			$imagen = $row[3]; 
+		}
+
+		
+		$table_header = '
+			<table id="estadisticas" class="table table-bordered table-hover">
+		'; 
+
+		$body = '
+		
+		'.$table_header.'
+
+		<thead>
+			<tr>
+				<th scope="col" style="text-align: center;"><strong>IMAGEN</strong></th>
+				<th scope="col" style="text-align: center;"><strong>VENDIDOS</strong></th>
+				<th scope="col" style="text-align: center;"><strong>NOMBRE</strong></th>
+				<th scope="col" style="text-align: center;"><strong>NO. DE PARTE</strong></th>
+				<th scope="col" style="text-align: center;"><strong>COSTO</strong></th>
+				<th scope="col" style="text-align: center;"><strong>P/UNITARIO</strong></th>
+				<th scope="col" style="text-align: center;"><strong>TOTAL</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td scope="col" style="text-align: center;">
+				<img src="/images/'.$row[3].'" height="50">
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: middle;"><b>'.$row[2].'</b></td>
+				<td scope="col" style="text-align: center; vertical-align: middle;">'.$row[1].'</td>
+				<td scope="col" style="text-align: center; vertical-align: middle;">'.$row[4].'</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+					<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($row[7],GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($row[5],GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($row[6],GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+		</tr>
+		
+		<tr>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($total_unitario,GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($total_total,GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+			</tr>
+			
+			
+		</tbody>
+		</table>';
+
+		$r = '
+		<div class="panel-heading" role="tab" id="headingOne">
+			<h4 class="panel-title">
+				<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+				INFORMACION DE VENTAS
+				</a>
+			</h4>
+		</div>
+		<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+			'.$body.'
+
+			<div class="col-md-12">
+				<center><div id="chart_div_user" style="width: auto; height: auto;"></div></center>
+			</div>
+		</div>
+		';
+
+		return $r;
+	}
+
+	function producto_vendidos_all ($desde, $hasta, $proveedor)
+	{
+		$con = db_conectar();
+		
+		//$inicio = '2018-07-18 00:00:00';
+		//$finaliza = '2018-07-18 23:59:59';
+		$inicio_old = $desde;
+		$desde = $inicio_old . ' 00:00:00';
+		
+		$finaliza_old = $hasta;
+		$hasta = $finaliza_old . ' 23:59:59';
+		$total_unitario = 0;
+		$total_total = 0;
+		$total_costo = 0;
+		
+		$body = '
+		
+		<table id="estadisticas" class="table table-bordered table-hover">
+
+		<thead>
+			<tr>
+				<th scope="col" style="text-align: center;"><strong>IMAGEN</strong></th>
+				<th scope="col" style="text-align: center;"><strong>VENDIDOS</strong></th>
+				<th scope="col" style="text-align: center;"><strong>NOMBRE</strong></th>
+				<th scope="col" style="text-align: center;"><strong>NO. DE PARTE</strong></th>
+				<th scope="col" style="text-align: center;"><strong>C/U</strong></th>
+				<th scope="col" style="text-align: center;"><strong>P/U</strong></th>
+				<th scope="col" style="text-align: center;"><strong>TOTAL</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+		';
+		
+		$data = mysqli_query($con,"SELECT v.id, p.nombre, (select sum(v2.unidades) from producto_vendidos v2 WHERE v2.producto = v.producto and v2.fecha >= '$desde' and v2.fecha <= '$hasta' ) as unidades, p.foto0, p.`no. De parte`, p.precio_normal, (p.precio_normal * unidades) as total, p.precio_costo FROM producto_vendidos v, productos p WHERE v.producto = p.id and v.fecha >= '$desde' and v.fecha <= '$hasta' and p.proveedor like '%$proveedor%' GROUP by v.producto ORDER by p.nombre asc");
+		
+		while($row = mysqli_fetch_array($data)) 
+		{ 
+		$total_unitario = $total_unitario + $row[5];
+		$total_total = $total_total + $row[6];
+		$total_costo = $total_costo + $row[7];
+		
+			$body .= '
+
+			<tr>
+				<td scope="col" style="text-align: center;">
+				<img src="/images/'.$row[3].'" height="50">
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: middle;"><b>'.$row[2].'</b></td>
+				<td scope="col" style="text-align: center; vertical-align: middle;">'.$row[1].'</td>
+				<td scope="col" style="text-align: center; vertical-align: middle;">'.$row[4].'</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($row[7],GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($row[5],GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($row[6],GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+			</tr>';
+		}
+
+			$body .= '
+			<tr>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center;"></td>
+				<td scope="col" style="text-align: center;"></td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($total_costo,GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($total_unitario,GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: right;">
+				
+				<table border="0" width="100%">
+					<tr>
+						<td style="text-align: center;">$</td>
+						<td style="text-align: right;">'.number_format($total_total,GetNumberDecimales(),".",",").'</td>
+					</tr>
+					</table>
+
+				</td>
+			</tr>';
+		
+		$body .=  
+		'</tbody>
+		</table>';
+		
+
+		$r = '
+		<div class="panel-heading" role="tab" id="headingOne">
+			<h4 class="panel-title">
+				<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+				INFORMACION DE VENTAS
+				</a>
+			</h4>
+		</div>
+		<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+			'.$body.'
+
+			<div class="col-md-12">
+				<center><div id="chart_div_user" style="width: auto; height: auto;"></div></center>
+			</div>
+		</div>
+		';
+		
+		return $r;
+	}
+
+	function producto_inventary ($pagina,$txt,$id_almacen)
+	{
+		$con = db_conectar();
+		
+		
+		$TAMANO_PAGINA = 5;
+
+		if (!$pagina) {
+			$inicio = 0;
+			$pagina = 1;
+		}
+		else {
+			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
+		}
+		
+		if (empty($txt))
+	    {
+	        $data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.descripcion, p.almacen, p.departamento, p.loc_almacen, p.marca, p.proveedor, p.precio_normal, p.oferta, p.precio_costo, p.stock, p.`tiempo de entrega`, p.stock_min, p.stock_max, p.cv, p.um, p.um_des  FROM productos p where p.almacen = $id_almacen ORDER by p.nombre asc limit $inicio, $TAMANO_PAGINA");
+			$datatmp = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.descripcion, p.almacen, p.departamento, p.loc_almacen, p.marca, p.proveedor, p.precio_normal, p.oferta, p.precio_costo, p.stock, p.`tiempo de entrega`, p.stock_min, p.stock_max, p.cv, p.um, p.um_des  FROM productos p where p.almacen = $id_almacen");
+	    }else
+	    {
+	        $data = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.descripcion, p.almacen, p.departamento, p.loc_almacen, p.marca, p.proveedor, p.precio_normal, p.oferta, p.precio_costo, p.stock, p.`tiempo de entrega`, p.stock_min, p.stock_max, p.cv, p.um, p.um_des  FROM productos p where p.almacen = $id_almacen and ( p.`no. De parte` like '%$txt%' or p.nombre like '%$txt%') ORDER by p.nombre asc  limit $inicio, $TAMANO_PAGINA");
+			$datatmp = mysqli_query($con,"SELECT p.id, p.`no. De parte`, p.nombre, p.descripcion, p.almacen, p.departamento, p.loc_almacen, p.marca, p.proveedor, p.precio_normal, p.oferta, p.precio_costo, p.stock, p.`tiempo de entrega`, p.stock_min, p.stock_max, p.cv, p.um, p.um_des  FROM productos p where p.almacen = $id_almacen and (  p.`no. De parte` like '%$txt%' or p.nombre like '%$txt%') ORDER by p.nombre asc");
+		}
+		
+		
+		
+		$pagination = '<div class="row">
+						<div class="col-md-12">
+						<div class="shop-pagination p-10 text-left">
+							<ul>';
+
+		
+		$num_total_registros = mysqli_num_rows($datatmp);
+		$total_paginas = ceil($num_total_registros / $TAMANO_PAGINA);
+
+		if ($pagina > 1)
+		{
+			$pagination = $pagination . '<li><a href="?pagina='.($pagina - 1 ).'&txt='.$txt.'&almacen='.$id_almacen.'" ><i class="zmdi zmdi-chevron-left"></i></a></li>';
+		}
+		
+		
+		if ($total_paginas > 1) {
+
+			if ($pagina <= 8)
+			{
+				for ($i=1; $i<$pagina; $i++) {
+				
+					$pagination = $pagination . '<li><a href="?pagina='.$i.'&txt='.$txt.'&almacen='.$id_almacen.'">'.$i.'</a></li>';	
+				}
+			}else
+			{
+				for ($i= ($pagina - 7); $i < $pagina; $i++) {
+				
+					$pagination = $pagination . '<li><a href="?pagina='.$i.'&txt='.$txt.'&almacen='.$id_almacen.'">'.$i.'</a></li>';	
+				}
+			}
+			
+		}
+		
+		$Pag_Max = $pagina + 8;
+		
+		if ($total_paginas > 1) {
+
+			for ($i=$pagina;$i<=$total_paginas;$i++) {
+				
+				if ( $i == $pagina)
+					$pagination = $pagination . '<li><a href="?pagina='.$i.'&txt='.$txt.'"><b>'.$i.'</b></a></li>';
+				elseif ( $i < $Pag_Max)
+					$pagination = $pagination . '<li><a href="?pagina='.$i.'&txt='.$txt.'&almacen='.$id_almacen.'">'.$i.'</a></li>';
+			}
+		}
+
+		if ($pagina < $total_paginas)
+		{
+			$pagination = $pagination . '<li><a href="?pagina='.($pagina + 1 ).'&txt='.$txt.'&almacen='.$id_almacen.'" ><i class="zmdi zmdi-chevron-right"></i></a></li>';
+		}
+		
+		$pagination = $pagination . '</ul>
+									</div>
+									</div>
+									</div><p>';
+		
+		
+		$body.= $pagination;
+
+
+		$body .= '
+		<table id="table" class="table table-bordered table-hover table-responsive">
+		
+		<thead>
+			<tr>
+				<th scope="col" style="text-align: center;"><strong>NO. PARTE</strong></th>
+				<th scope="col" style="text-align: center;"><strong>NOMBRE</strong></th>
+				<th scope="col" style="text-align: center;"><strong>DESCRIPCION</strong></th>
+				<th scope="col" style="text-align: center;"><strong>ALMACEN</strong></th>
+				<th scope="col" style="text-align: center;"><strong>DEPARTAMENTO</strong></th>
+				<th scope="col" style="text-align: center;"><strong>UBICACION</strong></th>
+				<th scope="col" style="text-align: center;"><strong>MARCA</strong></th>
+				<th scope="col" style="text-align: center;"><strong>PROVEDOR</strong></th>
+				<th scope="col" style="text-align: center;"><strong>P/NORMAL</strong></th>
+				<th scope="col" style="text-align: center;"><strong>P/OFERTA</strong></th>
+				<th scope="col" style="text-align: center;"><strong>P/COSTO</strong></th>
+				<th scope="col" style="text-align: center;"><strong>EXISTENCIAS</strong></th>
+				<th scope="col" style="text-align: center;"><strong>T/ENTREGA</strong></th>
+				<th scope="col" style="text-align: center;"><strong>E/MINIMO</strong></th>
+				<th scope="col" style="text-align: center;"><strong>E/MAXIMO</strong></th>
+				<th scope="col" style="text-align: center;"><strong>CV</strong></th>
+				<th scope="col" style="text-align: center;"><strong>UM</strong></th>
+				<th scope="col" style="text-align: center;"><strong>UD/DESCRIPCION</strong></th>
+				<th scope="col" style="text-align: center;"><strong>ELIMINAR</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+		';
+
+		$cont = 1;
+		
+		// Select Almacen
+		if ($_SESSION['change_suc'] == 1) 
+		{ 
+			$AlmacenData = mysqli_query(db_conectar(),"SELECT id, nombre FROM almacen ORDER by nombre asc");	
+		}else
+		{
+			$sucursal = $_SESSION['sucursal'];
+			$AlmacenData = mysqli_query(db_conectar(),"SELECT a.id, a.nombre FROM sucursal_almacen sa, almacen a where sa.sucursal = $sucursal and sa.almacen = a.id ORDER by a.nombre asc");	
+		}
+		// Select Almacen
+
+		$cont2 = 0;
+		while($row = mysqli_fetch_array($AlmacenData))
+	    {
+			$almacen[$cont2][0] = $row[0];
+			$almacen[$cont2][1] = $row[1];
+			$cont2 ++;
+		} // Data almacen
+
+		// Select Departamento
+		$DepartamentosData = mysqli_query(db_conectar(),"SELECT id, nombre FROM departamentos ORDER by nombre asc");	
+		$cont3 = 0;
+		while($row = mysqli_fetch_array($DepartamentosData))
+	    {
+			$departamentos[$cont3][0] = $row[0];
+			$departamentos[$cont3][1] = $row[1];
+			$cont3 ++;
+		} // Data Departamento
+				
+		// Agregar nuevo// Agregar nuevo// Agregar nuevo// Agregar nuevo// Agregar nuevo// Agregar nuevo
+		
+		// Data almacen - Agregar nuevo
+		$almacen_select = "";
+		for($i=0;$i<count($almacen);$i++) {
+
+			if ($row[4] == $almacen[$i][0])
+			{
+				$almacen_select .= '<option value='.$almacen[$i][0].' selected>'.$almacen[$i][1].'</option>';
+			}else
+			{
+				$almacen_select .= '<option value='.$almacen[$i][0].'>'.$almacen[$i][1].'</option>';
+			}
+		}
+		// Data almacen - Agregar nuevo
+
+		// Data departamento - Agregar nuevo
+		$departamento_select = "";
+		for($i=0;$i<count($departamentos);$i++) {
+
+			if ($row[5] == $departamentos[$i][0])
+			{
+				$departamento_select .= '<option value='.$departamentos[$i][0].' selected>'.$departamentos[$i][1].'</option>';
+			}else
+			{
+				$departamento_select .= '<option value='.$departamentos[$i][0].'>'.$departamentos[$i][1].'</option>';
+			}
+		}
+		// Data departamento - Agregar nuevo
+		
+
+
+		// Almacen para busqueda 
+		$almacen_select0 = "";
+		for($i=0;$i<count($almacen);$i++) {
+
+			if ($id_almacen == $almacen[$i][0])
+			{
+				$almacen_select0 .= '<option value='.$almacen[$i][0].' selected>'.$almacen[$i][1].'</option>';
+			}else
+			{
+				$almacen_select0 .= '<option value='.$almacen[$i][0].'>'.$almacen[$i][1].'</option>';
+			}
+		}
+		// ALmacen para busquedas
+
+		$body .= '
+			<tr>
+				<form action="products_inventary.php">
+				<p></p>
+				<td style="text-align: center; vertical-align: middle;">BUSCAR:</td>
+				
+				<td style="text-align: center; vertical-align: middle !important;">
+				<input id="txt_buscador" type="text" placeholder="Buscar" name="txt" autocomplete="off" style="background:white; border: 2px solid black; width: auto; height:40;" value="'.$_GET['txt'].'" focused>
+				<input type="hidden" id="pagina" name="pagina" value="1"></td>
+				
+				<td style="text-align: center; vertical-align: middle;">
+				<select id="almacen" name="almacen" required style="background:white; border: 2px solid '.$color.'; width: 100%; height:40;">
+						'.
+						$almacen_select0
+						.'
+					</select> 
+				</td>
+
+				<td style="text-align: center; vertical-align: middle;"><button type="submit" style="width:100%">Buscar</button>	
+				</form></td>
+
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+				<td style="text-align: center; vertical-align: middle;">-</td>
+			</tr>
+
+			<tr id="0tr">
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-no. De parte-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<textarea cols="30" rows="1" style="background:white; border: 2px solid '.$color.'; width: 120px; height:40; background-color: white; white-space: nowrap; overflow: hidden;resize: none;" id="0-no. De parte" ></textarea>
+			  	</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-nombre-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<textarea cols="30" rows="1" style="background:white; border: 2px solid '.$color.'; width: 240px; height:40; background-color: white; white-space: nowrap; overflow: hidden;resize: none;" id="0-nombre" ></textarea>
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-descripcion-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<textarea cols="30" rows="1" style="background:white; border: 2px solid '.$color.'; width: 360px; height:40; background-color: white; white-space: nowrap; overflow: hidden;resize: none;" id="0-descripcion" ></textarea>
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-almacen-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<select id="0-almacen" required style="background:white; border: 2px solid '.$color.'; width: 200px; height:40;" >>
+							'.
+							$almacen_select
+							.'
+					</select>  
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-departamento-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<select id="0-departamento" required style="background:white; border: 2px solid '.$color.'; width: 200px; height:40;" >>
+						'.
+						$departamento_select
+						.'
+					</select>  
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-loc_almacen-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-loc_almacen" value="" style="background:white; border: 2px solid '.$color.'; width: 100px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-marca-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-marca" value="" style="background:white; border: 2px solid '.$color.'; width: 150px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-proveedor-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-proveedor" value="" style="background:white; border: 2px solid '.$color.'; width: 150px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-precio_normal-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-precio_normal" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-precio_oferta-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-precio_oferta" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-precio_costo-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-precio_costo" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-stock-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-stock" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-tiempo de entrega-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-tiempo de entrega" value="" style="background:white; border: 2px solid '.$color.'; width: 150px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-stock_min-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-stock_min" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-stock_max-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-stock_max" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-cv-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-cv" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-um-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-um" value="" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" >
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-um_des-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<input type="text" id="0-um_des" value="" style="background:white; border: 2px solid '.$color.'; width: 120px; height:40;" >
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="0-agregar-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: black; vertical-align: middle; display: none;"></i>
+					<button id="0-agregar" onclick="agregar(0)">Agregar</button> 
+				</td>
+			</tr>';
+		// Finaliza agregar nuevo // Finaliza agregar nuevo // Finaliza agregar nuevo // Finaliza agregar nuevo 
+		
+		while($row = mysqli_fetch_array($data)) 
+		{ 
+		
+			if (($cont % 2) == 0) {
+				$color = "red";
+			} else {
+				$color = "blue";
+			}
+
+			// Data almacen
+			$almacen_select = "";
+			for($i=0;$i<count($almacen);$i++) {
+
+				if ($row[4] == $almacen[$i][0])
+				{
+					$almacen_select .= '<option value='.$almacen[$i][0].' selected>'.$almacen[$i][1].'</option>';
+				}else
+				{
+					$almacen_select .= '<option value='.$almacen[$i][0].'>'.$almacen[$i][1].'</option>';
+				}
+			}
+			// Data almacen
+
+			// Data departamento
+			$departamento_select = "";
+			for($i=0;$i<count($departamentos);$i++) {
+
+				if ($row[5] == $departamentos[$i][0])
+				{
+					$departamento_select .= '<option value='.$departamentos[$i][0].' selected>'.$departamentos[$i][1].'</option>';
+				}else
+				{
+					$departamento_select .= '<option value='.$departamentos[$i][0].'>'.$departamentos[$i][1].'</option>';
+				}
+			}
+			// Data departamento
+
+			$body .= '
+
+			<tr id="'.$row[0].'tr">
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-no. De parte-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<textarea cols="30" rows="1" style="background:white; border: 2px solid '.$color.'; width: 120px; height:40; background-color: white; white-space: nowrap; overflow: hidden;resize: none;" id="'.$row[0].'-no. De parte" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">'.$row[1].'</textarea>
+			  	</td>
+				
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-nombre-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<textarea cols="30" rows="1" style="background:white; border: 2px solid '.$color.'; width: 240px; height:40; background-color: white; white-space: nowrap; overflow: hidden;resize: none;" id="'.$row[0].'-nombre" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">'.$row[2].'</textarea>
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-descripcion-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<textarea cols="30" rows="1" style="background:white; border: 2px solid '.$color.'; width: 360px; height:40; background-color: white; white-space: nowrap; overflow: hidden;resize: none;" id="'.$row[0].'-descripcion" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">'.$row[3].'</textarea>
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-almacen-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<select id="'.$row[0].'-almacen" required style="background:white; border: 2px solid '.$color.'; width: 200px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">>
+						'.
+						$almacen_select
+						.'
+					</select>  
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-departamento-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<select id="'.$row[0].'-departamento" required style="background:white; border: 2px solid '.$color.'; width: 200px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">>
+						'.
+						$departamento_select
+						.'
+					</select>  
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-loc_almacen-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-loc_almacen" value="'.$row[6].'" style="background:white; border: 2px solid '.$color.'; width: 100px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-marca-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>	
+					<input type="text" id="'.$row[0].'-marca" value="'.$row[7].'" style="background:white; border: 2px solid '.$color.'; width: 150px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-proveedor-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-proveedor" value="'.$row[8].'" style="background:white; border: 2px solid '.$color.'; width: 150px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-precio_normal-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-precio_normal" value="'.$row[9].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-precio_oferta-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-precio_oferta" value="'.$row[10].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-precio_costo-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-precio_costo" value="'.$row[11].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-stock-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-stock" value="'.$row[12].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-tiempo de entrega-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-tiempo de entrega" value="'.$row[13].'" style="background:white; border: 2px solid '.$color.'; width: 150px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-stock_min-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-stock_min" value="'.$row[14].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-stock_max-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-stock_max" value="'.$row[15].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-cv-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-cv" value="'.$row[16].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-um-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-um" value="'.$row[17].'" style="background:white; border: 2px solid '.$color.'; width: 90px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-um_des-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<input type="text" id="'.$row[0].'-um_des" value="'.$row[18].'" style="background:white; border: 2px solid '.$color.'; width: 120px; height:40;" onchange="update(this.id)" onkeyup = "if(event.keyCode == 13) update(this.id)">
+				</td>
+				<td scope="col" style="text-align: center; vertical-align: middle; background:'.$color.';">
+					<i id="'.$row[0].'-quitar-spiner" class="fa fa-spinner w3-spin" style="font-size:35px; color: white ; vertical-align: middle; display: none;"></i>
+					<button id="'.$row[0].'" onclick="quitar(this.id)">Eliminar</button> 
+				</td>
+			</tr>';
+
+			$cont ++;
+		}
+
+		$body .=  
+		'</tbody>
+		</table>';
+		
+
+		$r = '
+		<div class="panel-heading" role="tab" id="headingOne">
+			<h4 class="panel-title">
+				<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+				INVENTARIO DE PRODUCTOS
+				</a>
+			</h4>
+		</div>
+		<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+			'.$body.'
+
+			<div class="col-md-12">
+				<center><div id="chart_div_user" style="width: auto; height: auto;"></div></center>
+			</div>
+		</div>
+		';
+		
 		return $r;
 	}
 
