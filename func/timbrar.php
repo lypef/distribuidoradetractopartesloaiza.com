@@ -6,13 +6,12 @@
     // Se desactivan los mensajes de debug
     error_reporting((E_WARNING|E_NOTICE));
     //error_reporting(E_ALL);
-   
+    
     // Se especifica la zona horaria
     date_default_timezone_set('America/Mazatlan');
-
+    
     require_once 'db.php';
     //require_once 'imprime.php';
-    
     // Se incluye el SDK
     require_once 'SDK2/sdk2.php';
 
@@ -53,7 +52,7 @@ if (ExistFact($_POST['folio']) == false)
         $cfdi_pass = $row[6];
     }
 
-    $cliente = mysqli_query(db_conectar(),"SELECT c.rfc, c.razon_social, c.correo, c.id, v.descuento, c.r_fiscal, c.d_fiscal FROM folio_venta v, clients c WHERE v.client = c.id and v.folio = '$folio'");
+    $cliente = mysqli_query(db_conectar(),"SELECT c.rfc, c.razon_social, c.correo, c.id, v.descuento, c.r_fiscal, c.d_fiscal, c.telefono FROM folio_venta v, clients c WHERE v.client = c.id and v.folio = '$folio'");
 
     while($row = mysqli_fetch_array($cliente))
     {
@@ -64,6 +63,7 @@ if (ExistFact($_POST['folio']) == false)
         $venta_descuento = $row[4] / 100;
         $cfdi_cliente_r_fiscal = $row[5];
         $cfdi_cliente_d_fiscal = strtoupper($row[6]);
+        $telefonos = $row[7];
     }
 
     // Se especifica la version de CFDi 4.0
@@ -451,6 +451,20 @@ if (ExistFact($_POST['folio']) == false)
 		
         mail($to, $subject, $message,$cabecera);
         
+        /////// Se envia notificacion a whatsapp de cliente //////////
+        $wp_body = '*Factura CFDI 4.0*';
+        $wp_body .= "\n\n" . 'Enlace archivo pdf.';
+        $wp_body .= "\n" . static_empresa_url().'func/SDK2/timbrados/' . $folio . '.pdf';
+        $wp_body .= "\n\n" . 'Enlace archivo xml.';
+        $wp_body .= "\n" . static_empresa_url().'func/SDK2/timbrados/' . $folio . '.xml';
+        
+        $cels = explode(",", $telefonos);
+
+        foreach ($cels as $telefono)
+        {
+            SendWP($telefono,$wp_body);
+        }
+        ///////// Se envia notificacion a whatsapp de cliente ////////
     
         // ** Finaliza envio de correo
     

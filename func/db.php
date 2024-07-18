@@ -10,6 +10,10 @@
 	define("mail_phpmailer","../phpmailer/PHPMailerAutoload.php");
 	define("mail_debug",false);
 
+	// Constantes WhatsMSG
+	define("WP_from","5219231200505");
+	define("WP_key","wJheqWx8rmDJaj90F2ycIMREpQZhXlAj");
+
 	function db_conectar ()
 	{
 		$host = "localhost";
@@ -21,6 +25,42 @@
 		return $coneccion;
 	}
 
+	function SendWP ($number,$body)
+	{
+		$MSG .= "*" . static_empresa_nombre() . "*";
+		$MSG .= "\n\n" . $body;
+		
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+		CURLOPT_URL => "https://api.whatmsg.com/msg",
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING => "",
+		CURLOPT_MAXREDIRS => 10,
+		CURLOPT_TIMEOUT => 30,
+		CURLOPT_SSL_VERIFYHOST => 0,
+		CURLOPT_SSL_VERIFYPEER => 0,
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		CURLOPT_CUSTOMREQUEST => "POST",
+		CURLOPT_POSTFIELDS => "apikey=".WP_key."&from=".WP_from."&to=".$number."&msgbody= ".$MSG." ",
+		CURLOPT_HTTPHEADER => array(
+			"content-type: application/x-www-form-urlencoded"
+		),
+		));
+
+		$response = curl_exec($curl);
+		$err = curl_error($curl);
+
+		curl_close($curl);
+
+		if (!$err) {
+			echo "cURL Error #:" . $err;
+		} 
+		else {
+			echo $response;
+		}
+	}
+
 	function GetNumberDecimales ()
 	{
 		return 2;
@@ -28,12 +68,12 @@
 	
 	function static_empresa_nombre ()
 	{
-		return "DTPL";
+		return "MATERIALES FERRE LUCY";
 	}
 
 	function static_empresa_url ()
 	{
-		return "https://distribuidoradetractopartesloaiza.com/";
+		return "http://www.materialesferrelucy.com/";
 		//return "http://localhost/";
 	}
 
@@ -49,17 +89,17 @@
 	
 	function ColorBarrReport ()
 	{
-		return "#FFBF00";
+		return "#ff7a01";
 	}
 
 	function DesglosarReportIva ()
 	{
 		return true;
-	}	
+	}
 
 	function Ticket ()
 	{
-		return false;
+		return true;
 	}
 
 	function ReportCotTranfers ()
@@ -18190,7 +18230,7 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 
-		$data = mysqli_query(db_conectar(),"SELECT f.folio, u.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.iva, f.t_pago, c.id, c.correo FROM folio_venta f, users u, clients c, sucursales s WHERE f.open = 1 and f.pedido = 0 and f.cotizacion = 1 and f.vendedor = u.id and f.client = c.id and f.sucursal = s.id order by f.fecha desc LIMIT $inicio, $TAMANO_PAGINA");
+		$data = mysqli_query(db_conectar(),"SELECT f.folio, u.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.iva, f.t_pago, c.id, c.correo, c.telefono FROM folio_venta f, users u, clients c, sucursales s WHERE f.open = 1 and f.pedido = 0 and f.cotizacion = 1 and f.vendedor = u.id and f.client = c.id and f.sucursal = s.id order by f.fecha desc LIMIT $inicio, $TAMANO_PAGINA");
 		
 
 		$select_con = mysqli_query(db_conectar(),"SELECT id, nombre FROM clients ORDER by nombre asc");
@@ -18369,6 +18409,10 @@
 							<div class="col-md-12">
 								<label>Ingrese el correo del cliente</label>
 								<input type="text" name="mail" id="mail" placeholder="correo1,Correo2,..."  value="'.$row[11].'">
+							</div>
+							<div class="col-md-12"><br>
+								<label>Numero de Whatsapp</label>
+								<input type="text" name="telefono" id="telefono" placeholder="01,02,..."  value="'.$row[12].'">
 							</div>
 							<input id="body" name="body" type="hidden" value="APRECIABLE <b>'.$row[2].'</b>. SE ADJUNTA <b>COTIZACION VIGENTE </b>%cot_cot%">
 					</div>
@@ -18401,7 +18445,7 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 
-		$data = mysqli_query(db_conectar(),"SELECT f.folio, u.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.iva, f.t_pago, c.id, c.correo FROM folio_venta f, users u, clients c, sucursales s WHERE f.open = 1 and f.cotizacion = 1 and f.vendedor = u.id and f.client = c.id and f.sucursal = s.id and f.folio like '%$txt%' or f.open = 1 and f.cotizacion = 1 and f.vendedor = u.id and f.client = c.id and f.sucursal = s.id and c.nombre like '%$txt%' LIMIT $inicio, $TAMANO_PAGINA");
+		$data = mysqli_query(db_conectar(),"SELECT f.folio, u.nombre, c.nombre, f.descuento, f.fecha, f.cobrado, f.fecha_venta, s.nombre, f.iva, f.t_pago, c.id, c.correo, c.telefono FROM folio_venta f, users u, clients c, sucursales s WHERE f.open = 1 and f.cotizacion = 1 and f.vendedor = u.id and f.client = c.id and f.sucursal = s.id and f.folio like '%$txt%' or f.open = 1 and f.cotizacion = 1 and f.vendedor = u.id and f.client = c.id and f.sucursal = s.id and c.nombre like '%$txt%' LIMIT $inicio, $TAMANO_PAGINA");
 		
 		$select_con = mysqli_query(db_conectar(),"SELECT id, nombre FROM clients ORDER by nombre asc");
 		$select = "<option value='0'>CLIENTE</option>";
@@ -18579,6 +18623,10 @@
 							<div class="col-md-12">
 								<label>Ingrese el correo del cliente</label>
 								<input type="text" name="mail" id="mail" placeholder="correo1,Correo2,..."  value="'.$row[11].'">
+							</div>
+							<div class="col-md-12"><br>
+								<label>Numero de Whatsapp</label>
+								<input type="text" name="telefono" id="telefono" placeholder="01,02,..."  value="'.$row[12].'">
 							</div>
 							<input id="body" name="body" type="hidden" value="APRECIABLE <b>'.$row[2].'</b>. SE ADJUNTA <b>COTIZACION VIGENTE </b>%cot_cot%">
 					</div>
@@ -19305,7 +19353,7 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 
-		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie FROM facturas f, clients c where f.cliente = c.id LIMIT $inicio, $TAMANO_PAGINA");
+		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie, c.telefono FROM facturas f, clients c where f.cliente = c.id LIMIT $inicio, $TAMANO_PAGINA");
 
 		$body = "";
 		while($row = mysqli_fetch_array($data))
@@ -19327,6 +19375,10 @@
 					<div class="col-md-12">
 						<p>Si desea agregar 1 o mas correos deberan ir separados por comas (,)</p>
                         <input type="text" name="cfdi_cliente_correo" id="cfdi_cliente_correo" placeholder="correo@empresa.com" required value="'.$row[1].'">
+					</div>
+					<div class="col-md-12"><br>
+						<p>Si desea agregar 1 o mas numeros deberan ir separados por comas (,)</p>
+						<input type="text" name="telefono" id="telefono" placeholder="01,02,..." required value="'.$row[3].'">
 					</div>
 					</div>
 				</div>
@@ -19389,8 +19441,8 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 
-		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'  LIMIT $inicio, $TAMANO_PAGINA ");
-		$datatmp = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'");
+		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie, c.telefono FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'  LIMIT $inicio, $TAMANO_PAGINA ");
+		$datatmp = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie, c.telefono FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'");
 
 		$body = "";
 		while($row = mysqli_fetch_array($data))
@@ -19412,6 +19464,10 @@
 					<div class="col-md-12">
 						<p>Si desea agregar 1 o mas correos deberan ir separados por comas (,)</p>
                         <input type="text" name="cfdi_cliente_correo" id="cfdi_cliente_correo" placeholder="correo@empresa.com" required value="'.$row[1].'">
+					</div>
+					<div class="col-md-12"><br>
+						<p>Si desea agregar 1 o mas numeros deberan ir separados por comas (,)</p>
+                        <input type="text" name="telefono" id="telefono" placeholder="01,02,..." required value="'.$row[3].'">
 					</div>
 					</div>
 				</div>
@@ -22850,15 +22906,17 @@
 	function SendMailLog ($folio, $open)
 	{
 	    $cliente = "";
-	    $correo = "";
+		$correo = "";
+		$telefonos = "";
 	    
-    	$data = mysqli_query(db_conectar(),"SELECT c.nombre ,c.correo FROM folio_venta f, clients c WHERE f.client = c.id and folio =" . $folio);
+    	$data = mysqli_query(db_conectar(),"SELECT c.nombre ,c.correo, c.telefono FROM folio_venta f, clients c WHERE f.client = c.id and folio =" . $folio);
 		
 		
 		if($row = mysqli_fetch_array($data))
 	    {
 	        $cliente = $row[0];
-	        $correo = $row[1];
+			$correo = $row[1];
+			$telefonos = $row[2];
 	    }
 	    
 	    $correo .= ','.static_empresa_email().'';
@@ -23048,7 +23106,23 @@
         $mail->Body = $formato;
         
         $mail->send();
+		
+		
+		/////// Se envia notificacion a whatsapp de cliente //////////
+        $wp_body = '*Venta registrada con exito*';
+        $wp_body .= "\n\n" . '*Cliente:*';
+		$wp_body .= "\n" . $cliente;
+		$wp_body .= "\n\n" . '*Comprobante Electronico:*';
+        $wp_body .= "\n" . static_empresa_url().'sale_finaly_report.php?folio_sale='.$folio;
         
+        
+        $cels = explode(",", $telefonos);
+
+        foreach ($cels as $telefono)
+        {
+            SendWP($telefono,$wp_body);
+        }
+        ///////// Se envia notificacion a whatsapp de cliente ////////
     }    
     
     function Return_TotalPagar_Folio ($folio)
