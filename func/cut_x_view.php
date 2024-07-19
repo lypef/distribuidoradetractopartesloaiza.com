@@ -263,8 +263,21 @@
             $cabecera = "From: GrupoAscgar"."\r\n";
             $cabecera .= "Reply-To: cyberchoapas@gmail.com"."\r\n";
             $cabecera .= "Content-type: text/html;  charset=utf-8";
-
+            
             $enviar = mail($mail_receptor, "Corte Z Personal", $codigoHTML, $cabecera); 
+
+            $bodyWP = "*### CORTE Z ###*";
+            $bodyWP .= "\n\n*Usuario*";
+            $bodyWP .= "\n" . $txt_user;
+            
+            $bodyWP .= "\n\n*Fecha y Hora*";
+            $bodyWP .= "\n" . GetFechaText(date("Y-m-d H:i:s"));
+
+            $bodyWP .= "\n\n*Total*";
+            $bodyWP .= "\n$ " . number_format($total_pagar_,GetNumberDecimales(),".",",");
+            $bodyWP .= "\n(" . str_replace("M.N.","MXN",numtoletras($total_pagar_)).")";
+
+            SendWPEmpresa($bodyWP);
         }
     }
 ?>
