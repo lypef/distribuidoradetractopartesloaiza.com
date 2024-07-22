@@ -1401,7 +1401,75 @@
         jQuery('.mean-nav ul:first').slideUp();
         jQuery(".meanmenu-reveal.meanclose").toggleClass("meanclose").html("<span /><span /><span />");
         this.menuOn = false;
+        VerMenu(false);
     }
+
+    function VerMenu(bool) 
+    {
+        var x = document.getElementById("mobile_menu");
+        
+        if (bool == true)
+        {
+            x.style.display = "block";
+        }
+        
+        if (bool == false)
+        {
+            x.style.display = "none";
+        }
+    }
+
+    function detectMob() {
+        const toMatch = [
+            /Android/i,
+            /webOS/i,
+            /iPhone/i,
+            /iPad/i,
+            /iPod/i,
+            /BlackBerry/i,
+            /Windows Phone/i
+        ];
+        
+        return toMatch.some((toMatchItem) => {
+            return navigator.userAgent.match(toMatchItem);
+        });
+    }
+
+    $("#addclient").on("hidden.bs.modal", function () {
+        
+        if (detectMob())
+        {
+            VerMenu(true);
+        }
+    });
+    
+    $("#addprospecto").on("hidden.bs.modal", function () {
+        if (detectMob())
+        {
+            VerMenu(true);
+        }
+    });
+    
+    $("#ingreso").on("hidden.bs.modal", function () {
+        if (detectMob())
+        {
+            VerMenu(true);
+        }
+    });
+
+    $("#egreso").on("hidden.bs.modal", function () {
+        if (detectMob())
+        {
+            VerMenu(true);
+        }
+    });
+    
+    $("#addlicence").on("hidden.bs.modal", function () {
+        if (detectMob())
+        {
+            VerMenu(true);
+        }
+    });
 
     </script>
 </body>

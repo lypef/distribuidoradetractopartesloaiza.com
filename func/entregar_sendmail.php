@@ -2,42 +2,49 @@
     require_once 'db.php';
     db_sessionValidarNO();
     
-    if ($_SESSION['token'] == GetToken())
+	$url = $_POST['url'];
+	
+	$link_temp = explode(",", $_POST['link']);
+	
+	$link = $link_temp[0];
+	
+	$id_software = $link_temp[1];
+
+	$header = $_POST['header'];
+
+	$url = str_replace("&sendmail=true","",$url);
+	$url = str_replace("?sendmail=true","",$url);
+	$url = str_replace("&nosendmail=true","",$url);
+	$url = str_replace("?nosendmail=true","",$url);
+
+	$current_url = $_POST['url_web']; 
+
+	$mail_receptor = $_POST['mail'];
+	
+	$body = $_POST['body'];
+	
+	$folio = $_POST['folio'];
+	
+	$message = $_POST['body'];
+	
+    if ($_SESSION['token'] == GetToken() && !empty($link))
     {
-        $url = $_POST['url'];
-        $link = $_POST['link'];
-    
-        $header = $_POST['header'];
-    
-        $url = str_replace("&sendmail=true","",$url);
-        $url = str_replace("?sendmail=true","",$url);
-        $url = str_replace("&nosendmail=true","",$url);
-        $url = str_replace("?nosendmail=true","",$url);
-    
-        $current_url = $_POST['url_web']; 
-    
-        $mail_receptor = $_POST['mail'];
+		// Se agraga licencia a servidor
+		$licence = $folio;
+		
+		$fecha_actual = date("d-m-Y");
         
-        $body = $_POST['body'];
+		$end = date("Y-m-d",strtotime($fecha_actual."+ ".$_POST['end']." days")); 
         
-        $folio = $_POST['folio'];
+        $id_software_licence = $id_software;
         
-        $message = $_POST['body'];
+        $con = db_conectarLicences();  
         
-        // Copiar y subir titulo
-    	if ($_FILES["titulo"]["name"])
-    	{
-    		$ruta_img = 'titulos/'.$folio.'.pdf';
-            $img_access = '../'.$ruta_img;
-    		
-    		//unlink($img_access);
-    
-    		copy($_FILES["titulo"]["tmp_name"], $img_access );
-    		mysqli_query(db_conectar(),"UPDATE `folio_venta` SET `titulo` = '$ruta_img' WHERE `folio_venta`.`folio` = '$folio';");
-    	}
-    	// Finaliza Copiar y subir titulo
-    
-        if ($txtxtra.length > 0)
+		//mysqli_query($con,"INSERT INTO `licence` (`licence`, `mac`, `status`, `interesado`, `id_software_licence`, `end`) VALUES ('$licence', 'SN', '0', 'SN', '$id_software_licence', '$end');");
+		
+		// Finaliza
+		
+		if ($txtxtra.length > 0)
         {
             $txtxtra .= '<br>'; 
         }
@@ -174,21 +181,22 @@
     				<body>
     				<div class="opps">
     				<div class="opps-header">
-    					<div class="opps-reminder">GRUPO ASCGAR</div>
+    					<div class="opps-reminder">'.static_empresa_nombre().'</div>
     						</div>
                       		<span><center><br>'.$message.'<br><br></center></span>
                       </p>
     						<div class="opps-instructions">
     							<h2>Instrucciones !</h2>
     							<ol>
-    								<li>Descargue sistema, <a href="'.$link.'" target="_blank"> AQUI</a>.</li>
-                                  <li>Visualice videos de como se instala, <a href="https://www.youtube.com/channel/UCyGopyJoASFYL6uulromDwg/playlists" target="_blank"> VER AQUI</a>.</li>
+								  <li>Descargue sistema, <a href="'.$link.'" target="_blank"> AQUI</a>.</li>
+                                  <li>Visualice videos de instalacion, configuracion y uso. <a href="https://www.youtube.com/@cyberchoapas1529/playlists" target="_blank"> VER AQUI</a>.</li>
                                   <li>Instale e introduca licencia: '.$folio.'.</li><br>
     								<hr>
                                   <br><h2>Algun problema ?</h2>
     							<ol>
-    								<li>Soporte tecnico <a href="mailto:soporte@cyberchoapas.com" target="_blank">Enviar correo</a></li>
-    								<li>Contacto xpres por <a href="https://api.whatsapp.com/send?phone=5219231200505&text=&source=&data=" target="_blank">whatsapp</a></li>
+    								<li>Soporte tecnico <a href="mailto:'.static_empresa_email_responder().'" target="_blank">Enviar correo</a></li>
+    								<li>Contacto xpres por <a href="https://api.whatsapp.com/send?phone=5219231200505&text=&source=&data=" target="_blank">Whatsapp</a></li>
+									<li>Contacto xpres por <a href="https://t.me/cyberchoapas"_blank">Telegram</a></li>
     							</ol>
     							</ol>
     							<div class="opps-footnote"> <strong>LICENCIA: </strong>'.$folio.'</div>
@@ -209,7 +217,7 @@
         //Email receptor
         $mail_receptor .= ','.static_empresa_email();
         $ArrMail = explode(",",$mail_receptor);
-        
+						
         foreach ($ArrMail as $valor) {
             $mail->addAddress($valor);
         }
@@ -223,7 +231,21 @@
         $mail->Body = $formato;
         
         $r = $mail->send();
-        
+		
+		/////// Se envia notificacion a whatsapp de cliente //////////
+		$wp_body = 'Se adjunta informacion de su Licencia.';
+		$wp_body .= "\n\n" .'*Descargue su sistema:*';
+		$wp_body .= "\n" . $link;
+		$wp_body .= "\n\n" . '*Ingrese su licencia:*';
+		$wp_body .= "\n" . $folio;
+		$wp_body .= "\n\n" . '*Visualice videos de instalacion, configuracion y uso:*';
+		$wp_body .= "\n" . "https://www.youtube.com/@cyberchoapas1529/playlists";
+		
+		
+		SendWPNOPDF($_POST['telefono'],$wp_body);
+
+		///////// Se envia notificacion a whatsapp de cliente ////////
+
         $addpregunta = false;
     
         for($i=0;$i<strlen($url);$i++)
@@ -249,5 +271,7 @@
                 
             }
         }   
-    }
+    }else {
+		echo '<script>location.href = "'.$url.'&nosendmail=true"</script>';            
+	}
 ?>

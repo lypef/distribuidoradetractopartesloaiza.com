@@ -1,7 +1,7 @@
 <?php
 
-	date_default_timezone_set('America/Mexico_City');
-		
+	date_default_timezone_set('America/Mazatlan');
+	
 	// Constantes PHPMailer
 	define("mail_username","cltareportes@gmail.com");
 	define("mail_password","ksgu dsie uymv rcte");
@@ -13,6 +13,9 @@
 	// Constantes WhatsMSG
 	define("WP_from","5219231200505");
 	define("WP_key","wJheqWx8rmDJaj90F2ycIMREpQZhXlAj");
+	
+	// Numeropara notificaciones de whstapp de la empresa. 
+	define("WP_to_empresa","5219231200505");
 
 	function db_conectar ()
 	{
@@ -32,12 +35,12 @@
 	
 	function static_empresa_nombre ()
 	{
-		return "MATERIALES FERRE LUCY";
+		return "DTPL";
 	}
 
 	function static_empresa_url ()
 	{
-		return "http://www.materialesferrelucy.com/";
+		return "https://distribuidoradetractopartesloaiza.com/";
 		//return "http://localhost/";
 	}
 
@@ -53,17 +56,162 @@
 	
 	function ColorBarrReport ()
 	{
-		return "#ff7a01";
+		return "#FFBF00";
 	}
 
 	function DesglosarReportIva ()
 	{
 		return true;
-	}
+	}	
 
 	function Ticket ()
 	{
-		return true;
+		return false;
+	}
+
+	function SendWP ($number,$body, $pdf)
+	{
+		$MSG .= "*" . static_empresa_nombre() . "*";
+		$MSG .= "\n\n" . $body;
+		
+		
+		$telefonos = explode(",", $number);
+
+		foreach ($telefonos as $telefono)
+		{
+			$url = 'https://api.whatmsg.com/msg';
+    
+			// Datos a enviar en el cuerpo de la solicitud
+			$data = [
+				'apikey' => WP_key,
+				'from' => WP_from,
+				'to' => $telefono,
+				'msgbody' => [
+					'data' => ['url' => $pdf],
+					'caption' => $body
+				]
+			];
+			
+			// Configuración de cURL
+			$ch = curl_init($url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, [
+				'Accept: application/json',
+				'Content-Type: application/json'
+			]);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+			
+			// Ejecutar la solicitud
+			$response = curl_exec($ch);
+			
+			// Verificar si hubo algún error
+			if (curl_errno($ch)) {
+				echo 'Error: ' . curl_error($ch);
+			} else {
+				// Convertir la respuesta JSON a un array
+				$responseData = json_decode($response, true);
+				var_dump($responseData);
+			}
+			
+			// Cerrar cURL
+			curl_close($ch);
+		}
+
+		
+
+		if (!$err) {
+			echo "cURL Error #:" . $err;
+		} 
+		else {
+			echo $response;
+		}
+	}
+
+	function SendWPNOPDF ($number,$body)
+	{
+		$MSG .= "*" . static_empresa_nombre() . "*";
+		$MSG .= "\n\n" . $body;
+		
+		$telefonos = explode(",", $number);
+
+		foreach ($telefonos as $telefono)
+		{
+			$curl = curl_init();
+
+			curl_setopt_array($curl, array(
+			CURLOPT_URL => "https://api.whatmsg.com/msg",
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => "",
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 30,
+			CURLOPT_SSL_VERIFYHOST => 0,
+			CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POSTFIELDS => "apikey=".WP_key."&from=".WP_from."&to=".$telefono."&msgbody= ".$MSG." ",
+			CURLOPT_HTTPHEADER => array(
+				"content-type: application/x-www-form-urlencoded"
+			),
+			));
+
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+		}
+
+		
+		if (!$err) {
+			echo "cURL Error #:" . $err;
+		} 
+		else {
+			echo $response;
+		}
+	}
+
+	function SendWPEmpresa ($body,$pdf)
+	{
+		$MSG .= "*" . static_empresa_nombre() . "*";
+		$MSG .= "\n\n" . $body;
+		
+		
+		$telefonos = explode(",", WP_to_empresa);
+
+		foreach ($telefonos as $telefono)
+		{
+			$curl = curl_init();
+
+			curl_setopt_array($curl, array(
+			CURLOPT_URL => "https://api.whatmsg.com/msg",
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => "",
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 30,
+			CURLOPT_SSL_VERIFYHOST => 0,
+			CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POSTFIELDS => "apikey=".WP_key."&from=".WP_from."&to=".$telefono."&msgbody= ".$MSG." ",
+			CURLOPT_HTTPHEADER => array(
+				"content-type: application/x-www-form-urlencoded"
+			),
+			));
+
+			$response = curl_exec($curl);
+			$err = curl_error($curl);
+
+			curl_close($curl);
+		}
+
+		
+
+		if (!$err) {
+			echo "cURL Error #:" . $err;
+		} 
+		else {
+			echo $response;
+		}
 	}
 
 	function ReportCotTranfers ()
@@ -71,78 +219,6 @@
 		return '';
 	}
 
-	function SendWP ($number,$body)
-	{
-		$MSG .= "*" . static_empresa_nombre() . "*";
-		$MSG .= "\n\n" . $body;
-		
-		$curl = curl_init();
-
-		curl_setopt_array($curl, array(
-		CURLOPT_URL => "https://api.whatmsg.com/msg",
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING => "",
-		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 30,
-		CURLOPT_SSL_VERIFYHOST => 0,
-		CURLOPT_SSL_VERIFYPEER => 0,
-		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		CURLOPT_CUSTOMREQUEST => "POST",
-		CURLOPT_POSTFIELDS => "apikey=".WP_key."&from=".WP_from."&to=".$number."&msgbody= ".$MSG." ",
-		CURLOPT_HTTPHEADER => array(
-			"content-type: application/x-www-form-urlencoded"
-		),
-		));
-
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
-
-		curl_close($curl);
-
-		if (!$err) {
-			echo "cURL Error #:" . $err;
-		} 
-		else {
-			echo $response;
-		}
-	}
-
-	function SendWPEmpresa ($body)
-	{
-		$MSG .= "*" . static_empresa_nombre() . "*";
-		$MSG .= "\n\n" . $body;
-		
-		$curl = curl_init();
-
-		curl_setopt_array($curl, array(
-		CURLOPT_URL => "https://api.whatmsg.com/msg",
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING => "",
-		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 30,
-		CURLOPT_SSL_VERIFYHOST => 0,
-		CURLOPT_SSL_VERIFYPEER => 0,
-		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		CURLOPT_CUSTOMREQUEST => "POST",
-		CURLOPT_POSTFIELDS => "apikey=".WP_key."&from=".WP_from."&to=".WP_to_empresa."&msgbody= ".$MSG." ",
-		CURLOPT_HTTPHEADER => array(
-			"content-type: application/x-www-form-urlencoded"
-		),
-		));
-
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
-
-		curl_close($curl);
-
-		if (!$err) {
-			echo "cURL Error #:" . $err;
-		} 
-		else {
-			echo $response;
-		}
-	}
-	
 	function Comillas ($var)
 	{
 		return str_replace("'","''",$var);
@@ -9778,8 +9854,6 @@
 							<th class="table-head item-nam">TELEFONO</th>
 							<th class="table-head item-nam">RAZON SOCIAL</th>
 							<th class="table-head item-nam">CLASIFICACION</th>
-							<th class="table-head item-nam">ANUALIDAD</th>
-							<th class="table-head item-nam">MENSUALIDAD</th>
 							<th class="table-head item-nam">EMAIL</th>
 							<th class="table-head item-nam">EDITAR</th>
 							<th class="table-head item-nam">ELIMINAR</th>
@@ -9793,8 +9867,6 @@
 			if ($_SESSION['client_guest'] == 1)
 			{
 				$boton = '
-				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#annuitycliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
-				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mensualidadcliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
 				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mailcliente'.$row[0].'"><i class="zmdi zmdi-mail-send zmdi-hc-2x"></i></a></center></td>
 				<td class="item-des"><center><a class="button extra-small button-black mb-20" data-toggle="modal" data-target="#modalclient_edit'.$row[0].'" ><span> Editar</span> </a></p></center></td>
 				<td class="item-des"><center><p><a class="button extra-small button-black mb-20" data-toggle="modal" data-target="#modalclient_delete'.$row[0].'" ><span> Eliminar</span> </a></p></center></td>
@@ -9802,8 +9874,6 @@
 			}else {
 				// No pueden editar
 				$boton = '
-				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#annuitycliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
-				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mensualidadcliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
 				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mailcliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
 				<td class="item-des"><center><a class="button extra-small button-black mb-20" data-toggle="modal"><span> Editar</span> </a></p></center></td>
 				<td class="item-des"><center><p><a class="button extra-small button-black mb-20"><span> Eliminar</span> </a></p></center></td>
@@ -17514,14 +17584,15 @@
 
 		if ($_SESSION['full_graficas'] == 1)
 		{
-			$data = mysqli_query(db_conectar(),"SELECT id, if (prospecto = 1 , concat('(P) ', nombre), nombre ) as nombre, if (telefono = '' , 'TELEFONO DESCONOCIDO', telefono) AS telefono, interes, c_entero_nosotros, clasificacion, creado FROM `clients`  where prospecto = 0 and (`nombre` like '%$txt%' or `rfc` like '%$txt%' or `razon_social` like '%$txt%' or `correo` like '%$txt%') ORDER by nombre asc LIMIT $inicio, $TAMANO_PAGINA");
+			$data = mysqli_query(db_conectar(),"SELECT id, if (prospecto = 1 , concat('(P) ', nombre), nombre ) as nombre, if (direccion = '' , 'DIRECCION DESCONOCIDA', direccion) as  direccion, if (telefono = '' , 'TELEFONO DESCONOCIDO', telefono) AS telefono, if (razon_social  = '' , 'RAZON SOCIAL DESCONOCIDA', razon_social  ) AS razon_social, clasificacion FROM `clients`  where prospecto = 0 and (`nombre` like '%$txt%' or `rfc` like '%$txt%' or `razon_social` like '%$txt%' or `correo` like '%$txt%') ORDER by nombre asc LIMIT $inicio, $TAMANO_PAGINA");
 		}else
 		{
 			$id_user = $_SESSION['users_id'];
-			$data = mysqli_query(db_conectar(),"SELECT id, if (prospecto = 1 , concat('(P) ', nombre), nombre ) as nombre, if (telefono = '' , 'TELEFONO DESCONOCIDO', telefono) AS telefono, interes, c_entero_nosotros, clasificacion, creado FROM `clients`  where prospecto = 0 and user = $id_user and (`nombre` like '%$txt%' or `rfc` like '%$txt%' or `razon_social` like '%$txt%' or `correo` like '%$txt%') ORDER by nombre asc LIMIT $inicio, $TAMANO_PAGINA");
+			$data = mysqli_query(db_conectar(),"SELECT id, if (prospecto = 1 , concat('(P) ', nombre), nombre ) as nombre, if (direccion = '' , 'DIRECCION DESCONOCIDA', direccion) as  direccion, if (telefono = '' , 'TELEFONO DESCONOCIDO', telefono) AS telefono, if (razon_social  = '' , 'RAZON SOCIAL DESCONOCIDA', razon_social  ) AS razon_social, clasificacion FROM `clients`  where prospecto = 0 and user = $id_user and (`nombre` like '%$txt%' or `rfc` like '%$txt%' or `razon_social` like '%$txt%' or `correo` like '%$txt%') ORDER by nombre asc LIMIT $inicio, $TAMANO_PAGINA");
 		}
 		
-
+		
+		
 		$datatmp = mysqli_query(db_conectar(),"SELECT id FROM `clients`  where prospecto = 0 and user = $id_user and (`nombre` like '%$txt%' or `rfc` like '%$txt%' or `razon_social` like '%$txt%' or `correo` like '%$txt%')");
 
 		$pagination = '<div class="row">
@@ -17599,15 +17670,13 @@
 					<thead>
 						<tr>
 							<th class="table-head th-name uppercase">NOMBRE</th>
+							<th class="table-head item-nam">DIRECCION</th>
 							<th class="table-head item-nam">TELEFONO</th>
-							<th class="table-head item-nam">INTERES</th>
-							<th class="table-head item-nam">COMO SE ENTERO</th>
+							<th class="table-head item-nam">RAZON SOCIAL</th>
 							<th class="table-head item-nam">CLASIFICACION</th>
-							<th class="table-head item-nam">ANUALIDAD</th>
-							<th class="table-head item-nam">MENSUALIDAD</th>
-							<th class="table-head item-nam"><center>EMAIL</center></th>
-							<th class="table-head item-nam"><center>EDITAR</center></th>
-							<th class="table-head item-nam"><center>ELIMINAR</center></th>
+							<th class="table-head item-nam">EMAIL</th>
+							<th class="table-head item-nam">EDITAR</th>
+							<th class="table-head item-nam">ELIMINAR</th>
 						</tr>
 					</thead>
 					<tbody>';
@@ -17617,25 +17686,32 @@
 
 		while($row = mysqli_fetch_array($data))
 	    {
-			$boton =
-			'
-				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#annuitycliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
-				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mensualidadcliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
+			if ($_SESSION['client_guest'] == 1)
+			{
+				$boton = '
 				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mailcliente'.$row[0].'"><i class="zmdi zmdi-mail-send zmdi-hc-2x"></i></a></center></td>
-				<td class="item-des"><center><a class="button extra-small button-black mb-20" data-toggle="modal" data-target="#modalclient_edit'.$row[0].'" ><i class="zmdi zmdi-edit zmdi-hc-2x"></i></a></p></center></td>
-				<td class="item-des"><center><p><a class="button extra-small button-black mb-20" data-toggle="modal" data-target="#modalclient_delete'.$row[0].'" ><i class="zmdi zmdi-close zmdi-hc-2x"></i></a></p></center></td>
-			';
+				<td class="item-des"><center><a class="button extra-small button-black mb-20" data-toggle="modal" data-target="#modalclient_edit'.$row[0].'" ><span> Editar</span> </a></p></center></td>
+				<td class="item-des"><center><p><a class="button extra-small button-black mb-20" data-toggle="modal" data-target="#modalclient_delete'.$row[0].'" ><span> Eliminar</span> </a></p></center></td>
+				';
+			}else {
+				// No pueden editar
+				$boton = '
+				<td class="item-des"><center><a href="" class="button extra-small button-black mb-20" data-toggle="modal" data-target="#mailcliente'.$row[0].'"><i class="zmdi zmdi-plus zmdi-hc-2x"></i></a></center></td>
+				<td class="item-des"><center><a class="button extra-small button-black mb-20" data-toggle="modal"><span> Editar</span> </a></p></center></td>
+				<td class="item-des"><center><p><a class="button extra-small button-black mb-20"><span> Eliminar</span> </a></p></center></td>
+				';
+			}
 
 
 			$body = $body.'
-				<tr>
-				<td class="item-quality"><a href="/finance_clients.php?inicio=2013-05-29&finaliza='.$hoy.'&usuario=0&sucursal=0&client='.$row[0].'">'.$row[1].'</a></td>
-				<td class="item-des"><p>'.$row[2].'</p></td>
-				<td class="item-des"><p>'.$row[3].'</p></td>
-				<td class="item-des"><p>'.$row[4].'</p></td>
-				<td class="item-des"><center><b>'.$row[5].'</b></p></center></td>
-				'.$boton.'
-				</tr>
+			<tr>
+			<td class="item-quality"><a href="/finance_clients.php?inicio=2013-05-29&finaliza='.$hoy.'&usuario=0&sucursal=0&client='.$row[0].'">'.$row[1].'</a></td>
+			<td class="item-des"><p>'.$row[2].'</p></td>
+			<td class="item-des"><p>'.$row[3].'</p></td>
+			<td class="item-des"><p>'.$row[4].'</p></td>
+			<td class="item-des"><center><b>'.$row[5].'</b></p></center></td>
+			'.$boton.'
+			</tr>
 			';
 		}
 		$body = $body . '
@@ -18447,8 +18523,8 @@
 								<input type="text" name="mail" id="mail" placeholder="correo1,Correo2,..."  value="'.$row[11].'">
 							</div>
 							<div class="col-md-12"><br>
-								<label>Numero de Whatsapp</label>
-								<input type="text" name="telefono" id="telefono" placeholder="01,02,..."  value="'.$row[12].'">
+								<label>Ingrese el telefono del cliente</label>
+								<input type="text" name="telefono" id="telefono" placeholder="01,02,03,..."  value="'.$row[12].'">
 							</div>
 							<input id="body" name="body" type="hidden" value="APRECIABLE <b>'.$row[2].'</b>. SE ADJUNTA <b>COTIZACION VIGENTE </b>%cot_cot%">
 					</div>
@@ -18661,8 +18737,8 @@
 								<input type="text" name="mail" id="mail" placeholder="correo1,Correo2,..."  value="'.$row[11].'">
 							</div>
 							<div class="col-md-12"><br>
-								<label>Numero de Whatsapp</label>
-								<input type="text" name="telefono" id="telefono" placeholder="01,02,..."  value="'.$row[12].'">
+								<label>Ingrese el telefono del cliente</label>
+								<input type="text" name="telefono" id="telefono" placeholder="01,02,03,..."  value="'.$row[12].'">
 							</div>
 							<input id="body" name="body" type="hidden" value="APRECIABLE <b>'.$row[2].'</b>. SE ADJUNTA <b>COTIZACION VIGENTE </b>%cot_cot%">
 					</div>
@@ -19389,7 +19465,7 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 
-		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie, c.telefono FROM facturas f, clients c where f.cliente = c.id LIMIT $inicio, $TAMANO_PAGINA");
+		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie FROM facturas f, clients c where f.cliente = c.id LIMIT $inicio, $TAMANO_PAGINA");
 
 		$body = "";
 		while($row = mysqli_fetch_array($data))
@@ -19411,10 +19487,6 @@
 					<div class="col-md-12">
 						<p>Si desea agregar 1 o mas correos deberan ir separados por comas (,)</p>
                         <input type="text" name="cfdi_cliente_correo" id="cfdi_cliente_correo" placeholder="correo@empresa.com" required value="'.$row[1].'">
-					</div>
-					<div class="col-md-12"><br>
-						<p>Si desea agregar 1 o mas numeros deberan ir separados por comas (,)</p>
-						<input type="text" name="telefono" id="telefono" placeholder="01,02,..." required value="'.$row[3].'">
 					</div>
 					</div>
 				</div>
@@ -19477,8 +19549,8 @@
 			$inicio = ($pagina - 1) * $TAMANO_PAGINA;
 		}
 
-		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie, c.telefono FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'  LIMIT $inicio, $TAMANO_PAGINA ");
-		$datatmp = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie, c.telefono FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'");
+		$data = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'  LIMIT $inicio, $TAMANO_PAGINA ");
+		$datatmp = mysqli_query(db_conectar(),"SELECT f.folio, c.correo, f.serie FROM facturas f, clients c where f.cliente = c.id and f.folio LIKE '%$txt%' or f.cliente = c.id and c.nombre LIKE '%$txt%'");
 
 		$body = "";
 		while($row = mysqli_fetch_array($data))
@@ -19500,10 +19572,6 @@
 					<div class="col-md-12">
 						<p>Si desea agregar 1 o mas correos deberan ir separados por comas (,)</p>
                         <input type="text" name="cfdi_cliente_correo" id="cfdi_cliente_correo" placeholder="correo@empresa.com" required value="'.$row[1].'">
-					</div>
-					<div class="col-md-12"><br>
-						<p>Si desea agregar 1 o mas numeros deberan ir separados por comas (,)</p>
-                        <input type="text" name="telefono" id="telefono" placeholder="01,02,..." required value="'.$row[3].'">
 					</div>
 					</div>
 				</div>
@@ -23141,24 +23209,17 @@
         //Replace the plain text body with one created manually  
         $mail->Body = $formato;
         
-        $mail->send();
-		
+		$mail->send();
 		
 		/////// Se envia notificacion a whatsapp de cliente //////////
         $wp_body = '*Venta registrada con exito*';
         $wp_body .= "\n\n" . '*Cliente:*';
 		$wp_body .= "\n" . $cliente;
-		$wp_body .= "\n\n" . '*Comprobante Electronico:*';
-        $wp_body .= "\n" . static_empresa_url().'sale_finaly_report.php?folio_sale='.$folio;
-        
-        
-        $cels = explode(",", $telefonos);
-
-        foreach ($cels as $telefono)
-        {
-            SendWP($telefono,$wp_body);
-        }
+		
+		SendWP($telefonos,$wp_body,static_empresa_url().'sale_finaly_report_mob.php?folio_sale='.$folio);
+		
         ///////// Se envia notificacion a whatsapp de cliente ////////
+        
     }    
     
     function Return_TotalPagar_Folio ($folio)

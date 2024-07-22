@@ -30,21 +30,6 @@
     $cabecera .= "Content-type: text/html;  charset=utf-8";
     
 
-    /////// Se envia notificacion a whatsapp de cliente //////////
-	$wp_body = '*Factura CFDI 4.0*';
-	$wp_body .= "\n\n" . 'Enlace archivo pdf.';
-    $wp_body .= "\n" . static_empresa_url().'func/SDK2/timbrados/' . $folio . '.pdf';
-    $wp_body .= "\n\n" . 'Enlace archivo xml.';
-	$wp_body .= "\n" . static_empresa_url().'func/SDK2/timbrados/' . $folio . '.xml';
-	
-	$telefonos = explode(",", $_POST['telefono']);
-
-	foreach ($telefonos as $telefono)
-	{
-		SendWP($telefono,$wp_body);
-	}
-    ///////// Se envia notificacion a whatsapp de cliente ////////
-
 
 
     for($i=0;$i<strlen($url);$i++)

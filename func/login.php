@@ -72,7 +72,7 @@ else
               $_SESSION['cfdi_cer'] = $row[17];
               $_SESSION['cfdi_key'] = $row[18];
               $_SESSION['cfdi_pass'] = $row[19];
-              $_SESSION['token'] = $row[20];
+              $_SESSION['token'] = $row[22];
             }
             setcookie('clta_session', 'yes', time() + (86400 * 30), "/"); // 86400 = 1 day
             setcookie('clta_session_user', $user, time() + (86400 * 30), "/"); // 86400 = 1 day

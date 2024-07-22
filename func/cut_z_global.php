@@ -331,7 +331,7 @@
         $bodyWP .= "\n(" . str_replace("M.N.","MXN",numtoletras($total_pagar_)).")";
 
         SendWPEmpresa($bodyWP);
-        
+
         $enviar = mail($mail_receptor, "Corte Z Global", $codigoHTML, $cabecera);
     }
 ?>

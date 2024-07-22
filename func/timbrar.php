@@ -1,19 +1,15 @@
 <?php
-    
-    ini_set("default_charset", "UTF-8");
-    header('Content-Type: text/html; charset=UTF-8');
-    
-    // Se desactivan los mensajes de debug
-    error_reporting((E_WARNING|E_NOTICE));
-    //error_reporting(E_ALL);
-    
-    // Se especifica la zona horaria
+// Se desactivan los mensajes de debug
+error_reporting(~(E_WARNING|E_NOTICE));
+//error_reporting(E_ALL);
+
+// Se especifica la zona horaria
     date_default_timezone_set('America/Mazatlan');
-    
-    require_once 'db.php';
-    //require_once 'imprime.php';
-    // Se incluye el SDK
-    require_once 'SDK2/sdk2.php';
+
+require_once 'db.php';
+//require_once 'imprime.php';
+// Se incluye el SDK
+require_once 'SDK2/sdk2.php';
 
 if (ExistFact($_POST['folio']) == false)
 {
@@ -52,7 +48,7 @@ if (ExistFact($_POST['folio']) == false)
         $cfdi_pass = $row[6];
     }
 
-    $cliente = mysqli_query(db_conectar(),"SELECT c.rfc, c.razon_social, c.correo, c.id, v.descuento, c.r_fiscal, c.d_fiscal, c.telefono FROM folio_venta v, clients c WHERE v.client = c.id and v.folio = '$folio'");
+    $cliente = mysqli_query(db_conectar(),"SELECT c.rfc, c.razon_social, c.correo, c.id, v.descuento, c.r_fiscal, c.d_fiscal FROM folio_venta v, clients c WHERE v.client = c.id and v.folio = '$folio'");
 
     while($row = mysqli_fetch_array($cliente))
     {
@@ -63,7 +59,6 @@ if (ExistFact($_POST['folio']) == false)
         $venta_descuento = $row[4] / 100;
         $cfdi_cliente_r_fiscal = $row[5];
         $cfdi_cliente_d_fiscal = strtoupper($row[6]);
-        $telefonos = $row[7];
     }
 
     // Se especifica la version de CFDi 4.0
@@ -78,14 +73,14 @@ if (ExistFact($_POST['folio']) == false)
     $datos['xml_debug']='SDK2/timbrados/'.$folio.'.xml';
 
     // Credenciales de Timbrado
-    $datos['PAC']['usuario'] = 'CLM221103ANA';
-    $datos['PAC']['pass'] = 'alfo5653';
+    $datos['PAC']['usuario'] = 'DTP191016P83';
+    $datos['PAC']['pass'] = 'diesel1234';
     $datos['PAC']['produccion'] = 'SI';
 
     // Rutas y clave de los CSD
     $datos['conf']['cer'] = 'SDK2/certificados/cer.cer';
     $datos['conf']['key'] = 'SDK2/certificados/llave.key';
-    $datos['conf']['pass'] = 'alfo5653';
+    $datos['conf']['pass'] = 'diesel1234';
 
     // Datos de la Factura
     $datos['factura']['condicionesDePago'] = 'CONDICIONES';
@@ -93,7 +88,7 @@ if (ExistFact($_POST['folio']) == false)
     $datos['factura']['fecha_expedicion'] = date('Y-m-d\TH:i:s', time() - 120);
     $datos['factura']['folio'] = $folio;
     $datos['factura']['forma_pago'] = $cfdi_f_pago;
-    $datos['factura']['LugarExpedicion'] = '39747';
+    $datos['factura']['LugarExpedicion'] = '39014';
     $datos['factura']['metodo_pago'] = $cfdi_m_pago;
     $datos['factura']['moneda'] = $cfdi_moneda;
     $datos['factura']['serie'] = $cfdi_serie;
@@ -102,8 +97,8 @@ if (ExistFact($_POST['folio']) == false)
     $datos['factura']['Exportacion'] = '01';
     
     // Datos del Emisor
-    $datos['emisor']['rfc'] = 'CLM221103ANA'; //RFC DE PRUEBA
-    $datos['emisor']['nombre'] = 'COMERCIALIZADORA LOAIZA MUÑOZ Y LOAIZA';  // EMPRESA DE PRUEBA
+    $datos['emisor']['rfc'] = 'DTP191016P83'; //RFC DE PRUEBA
+    $datos['emisor']['nombre'] = 'DIESEL Y TRACTO PARTES LOAIZA';  // EMPRESA DE PRUEBA
     $datos['emisor']['RegimenFiscal'] = '601';
 
     // Datos del Receptor
@@ -118,7 +113,7 @@ if (ExistFact($_POST['folio']) == false)
     {
         $datos['InformacionGlobal']['Periodicidad'] = $periodo;
         $datos['InformacionGlobal']['Meses'] = $mes;
-        $datos['InformacionGlobal'][utf8_decode('Año')] = $year;
+        $datos['InformacionGlobal']['Año'] = $year;
     }
     
 
@@ -445,26 +440,12 @@ if (ExistFact($_POST['folio']) == false)
             </html>';
         
         
-        $cabecera = "From: DTPL"."ﾂ･rﾂ･n";
-		$cabecera .= "Reply-To: ".static_empresa_email_responder()."ﾂ･rﾂ･n";
+        $cabecera = "From: DTPL"."\r\n";
+		$cabecera .= "Reply-To: ".static_empresa_email_responder()."\r\n";
 		$cabecera .= "Content-type: text/html;  charset=utf-8";
 		
         mail($to, $subject, $message,$cabecera);
         
-        /////// Se envia notificacion a whatsapp de cliente //////////
-        $wp_body = '*Factura CFDI 4.0*';
-        $wp_body .= "\n\n" . 'Enlace archivo pdf.';
-        $wp_body .= "\n" . static_empresa_url().'func/SDK2/timbrados/' . $folio . '.pdf';
-        $wp_body .= "\n\n" . 'Enlace archivo xml.';
-        $wp_body .= "\n" . static_empresa_url().'func/SDK2/timbrados/' . $folio . '.xml';
-        
-        $cels = explode(",", $telefonos);
-
-        foreach ($cels as $telefono)
-        {
-            SendWP($telefono,$wp_body);
-        }
-        ///////// Se envia notificacion a whatsapp de cliente ////////
     
         // ** Finaliza envio de correo
     

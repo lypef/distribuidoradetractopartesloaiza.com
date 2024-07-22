@@ -18,7 +18,7 @@
         $fecha_venta = date("Y-m-d H:i:s");
     
         $con = db_conectar();  
-        $vals = mysqli_query($con,"SELECT client, descuento, fecha, fecha_venta, sucursal, iva FROM `folio_venta` WHERE folio = '$folio_a'");
+        $vals = mysqli_query($con,"SELECT f.client, f.descuento, f.fecha, f.fecha_venta, f.sucursal, f.iva, c.telefono FROM `folio_venta` f, clients c WHERE f.client = c.id and  f.folio ='$folio_a'");
     
         while($row = mysqli_fetch_array($vals))
         {
@@ -28,12 +28,15 @@
             $f_venta = $row[3];
             $sucursal = $row[4];
             $iva = $row[5];
+            $telefono = $row[6];
         }
     
         mysqli_query($con,"INSERT INTO `folio_venta` (`folio`,`vendedor`, `client`, `descuento`, `fecha`, `open`, `sucursal`, `iva`, `t_pago`, `pedido`, `folio_venta_ini`, `cobrado`, `fecha_venta`) VALUES ('$folio','$vendedor', '$cliente', '$descuento', '$fecha', '0', '$sucursal', '$iva', '$t_pago','1','$folio_a', '$abono','$fecha_venta');");
     
         if (!mysqli_error($con))
         {
+            $body = "Recibimos como *abono*, la cantidad de: $ " . number_format($abono,GetNumberDecimales(),".",",");
+            SendWP($telefono,$body,static_empresa_url().'sale_finaly_report_orderprint.php?folio_sale='.$folio_a);
             ProspectToClient($folio_a);
             echo '<script>location.href = "/sale_order.php?folio='.$folio_a.'&abono=true&pay='.$folio.'"</script>';
         }else

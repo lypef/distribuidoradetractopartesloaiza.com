@@ -828,7 +828,7 @@
                 </div>
             </div>
             <!-- Mobile Menu Start -->
-            <div class="mobile-menu-area">
+            <div class="mobile-menu-area" id="mobile_menu">
                 <div class="container" style="width:100%; !important">
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12">

@@ -245,25 +245,27 @@
     $codigoHTML .= FooterPageReport();
     
     
-    $codigoHTML = mb_convert_encoding($codigoHTML, 'HTML-ENTITIES', 'UTF-8');
+    /*$codigoHTML = mb_convert_encoding($codigoHTML, 'HTML-ENTITIES', 'UTF-8');
     $dompdf= new DOMPDF();
     $dompdf->set_paper('letter');
     $dompdf->load_html($codigoHTML);
     ini_set("memory_limit","128M");
     $dompdf->render();
-    $dompdf->stream("corte_z_usuario.pdf");
+    $dompdf->stream("corte_z_usuario.pdf");*/
+
+    echo $codigoHTML;
     
     if (isset($cut)) 
     {
         if ($cut == "1")
         {
-            mysqli_query(db_conectar(),$sql_update);
+            //mysqli_query(db_conectar(),$sql_update);
 
             $mail_receptor = static_empresa_email();
             $cabecera = "From: GrupoAscgar"."\r\n";
             $cabecera .= "Reply-To: cyberchoapas@gmail.com"."\r\n";
             $cabecera .= "Content-type: text/html;  charset=utf-8";
-            
+
             $enviar = mail($mail_receptor, "Corte Z Personal", $codigoHTML, $cabecera); 
 
             $bodyWP = "*### CORTE Z ###*";
@@ -278,6 +280,7 @@
             $bodyWP .= "\n(" . str_replace("M.N.","MXN",numtoletras($total_pagar_)).")";
 
             SendWPEmpresa($bodyWP);
+            
         }
     }
 ?>

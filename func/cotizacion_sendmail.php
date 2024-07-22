@@ -1,5 +1,5 @@
 <?php
-	require_once 'db.php';
+    require_once 'db.php';
     
     $url = $_POST['url'];
 
@@ -185,31 +185,33 @@
 			</html>
     ';
     
-    //$message = $message . '<br><br><b>Si no puede acceder a el enlace, ingrese manualmente aqui.</b><br>' . $current_url.'/sale_finaly_report_cotizacion.php?folio_sale='.$folio;
+    $mail = MailConfig();
+	
+	//Email receptor
+	$ArrMail = explode(",",$mail_receptor);
+	
+	foreach ($ArrMail as $valor) {
+		$mail->addAddress($valor);
+	}
 
-	$asunto = $_POST['header'];
-	$cabecera = "From: ".static_empresa_nombre()."\r\n";
-	$cabecera .= "Reply-To: ".static_empresa_email_responder()."\r\n";
-	$cabecera .= "Content-type: text/html;  charset=utf-8";
+	//Asunto
+	$mail->Subject = "Cotizacion";
 
-	$enviar = mail($mail_receptor, "Cotizacion", $formato,$cabecera);
-
+	$mail->msgHTML(file_get_contents($formato), __DIR__);
+	//Replace the plain text body with one created manually  
+	$mail->Body = $formato;
+	
+	$enviar = $mail->send();
 	
 	/////// Se envia notificacion a whatsapp de cliente //////////
-	$wp_body = 'Se adjunta informacion de su cotizacion.';
-	$wp_body .= "\n\n" .'*TOTAL:* $ '.number_format($total_pagar,GetNumberDecimales(),".",",");
-	$wp_body .= "\n" . '(' . numtoletras($total_pagar) . ')';
-	$wp_body .= "\n\n" . 'Enlace de descarga.';
-	$wp_body .= "\n" . static_empresa_url().'sale_finaly_report_cotizacion_plain.php?folio_sale='.$folio;
 	
-	$telefonos = explode(",", $_POST['telefono']);
+	$wp_body = '*TOTAL:* $ '.number_format($total_pagar,GetNumberDecimales(),".",",");
+	$wp_body .= "\n" . '(' . numtoletras($total_pagar) . ')';
+	$wp_body .= "\n\n" . 'Debido, a su interes en uno de nuestros productos o servicios. Le doy seguimiento a su solicitud, le envio su cotizacion y quedo a la orden para cualquier duda o comentario.';
+	
+	SendWP($_POST['telefono'],$wp_body,static_empresa_url().'sale_finaly_report_cotizacion_mob.php?folio_sale='.$folio);
 
-	foreach ($telefonos as $telefono)
-	{
-		SendWP($telefono,$wp_body);
-	}
 	///////// Se envia notificacion a whatsapp de cliente ////////
-
     
     if ($enviar)
     {

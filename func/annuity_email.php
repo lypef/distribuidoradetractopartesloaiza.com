@@ -12,7 +12,7 @@
 		$client = $_GET['client'];
 		$lastpay = $_GET['lastpay'];
 		
-		$message = 'Apreciable: <b>'.$client.'</b>, le notificamos que su anualidad: <b>'.$concepto.'</b> esta vencida o proxima a vencer, ya que su ultimo pago se registro el dia: <b>'.$lastpay.'</b>, esperando no causarle ninguna molestia si no todo lo contrario nos despedimos de usted quedando a la espera de su pronto pago para evitar demoras o suspenciones en su servicio.';
+		$message = 'Apreciable: <b>'.$client.'</b>, le notificamos que su anualidad: <b>'.$concepto.'</b> esta vencida o proxima a vencer, ya que su ultimo pago se registro el dia: <b>'.$lastpay.'</b>, esperando no causarle ninguna molestia si no todo lo contrario nos despedimos de usted quedando a la espera de su pronto pago.';
 
 		$formato = 
 		'
@@ -160,13 +160,24 @@
 					<div class="opps-instructions">
 								<h2>Instrucciones</h2>
 								<ol>
-									<li>Elija opcion de pago <a href="https://docs.google.com/document/d/1sAfwi1dGMLck4KXnpdhF4e4_XHYj4L4YnErFkgvIxXY/edit" target="_blank">SELECCIONE AQUI</a>.</li>
+									<li><b>DATOS BANCARIOS</b>
+									<br><br><b>BANCOPPEL</b>
+									<br>FRANCISCO EDUARDO ASCENCIO DOMINGUEZ
+
+									<br><br><b>TARJETA</b>
+									<br>4169 1607 2389 2627
+
+									<br><br><b>NUMERO DE CUENTA</b>
+									<br>10373915195 
+
+									<br><br><b>CLAVE INTERBANCARIA</b>
+									<br>137873103739151955
+									</li>
 									<li>Realice el pago correspondiente con tranferencia o en efectivo.</li>
 									<li>Responda este correo con su ficha de pago o envielo por <a href="https://api.whatsapp.com/send?phone=5219231200505&text=&source=&data=" target="_blank">whatsapp</a>.</li>
-									<li>Al confirmar su pago, le entregaran un comprobante impreso o digital segun sea el caso. <strong>En se podra verificar que se haya realizado correctamente.</strong> Conserva este comprobante de pago.</li>
 									<li>Al completar estos pasos recibiras un correo de <strong>CLTA D & D</strong> confirmando tu pago e iniciando logistica.</li>
 								</ol>
-								<div class="opps-footnote">GRUPO ASCGAR</div>
+								<div class="opps-footnote">GA CYBERCHOAPAS (CLTA)</div>
 							</div>
 						</div>	
 					</body>
@@ -180,7 +191,7 @@
 		
 		//Email receptor
 		$mail_receptor = ReturnEmailClientAnnuities($id);
-		$mail_receptor = $mail_receptor . ',contacto@cyberchoapas.com';
+		$mail_receptor = $mail_receptor . ','.static_empresa_email_responder();
 		$ArrMail = explode(",",$mail_receptor);
 		
 		foreach ($ArrMail as $valor) {
@@ -197,6 +208,28 @@
 		
 		$r = $mail->send();
 		
+		/////// Se envia notificacion a whatsapp de cliente //////////
+		$wp_body = '*Recordatorio de pago*';
+		$wp_body .= "\n\n" . 'Apreciable:* '.$client.'*, le notificamos que su anualidad: *'.$concepto.'* esta vencida o proxima a vencer. Esperando no causarle ninguna molestia si no todo lo contrario nos despedimos de usted quedando a la espera de su pronto pago.';;
+		
+		$wp_body .= "\n\n" .'*Monto a pagar:*';
+		$wp_body .= "\n" . "$ " . number_format($price,2,".",",");
+		$wp_body .= "\n" . numtoletras($price);
+		
+		$wp_body .= "\n\n" .'*DATOS BANCARIOS*';
+		$wp_body .= "\n\n" .'*### BANCOPPEL ###*';
+		$wp_body .= "\n" .'FRANCISCO EDUARDO ASCENCIO DOMINGUEZ';
+		$wp_body .= "\n\n" .'*TARJETA*';
+		$wp_body .= "\n" .'4169 1607 2389 2627';
+		$wp_body .= "\n\n" .'*NUMERO DE CUENTA*';
+		$wp_body .= "\n" .'10373915195';
+		$wp_body .= "\n\n" .'*CLAVE INTERBANCARIA*';
+		$wp_body .= "\n" .'137873103739151955';
+		
+		SendWPNOPDF($_GET['telefono'],$wp_body);
+
+		///////// Se envia notificacion a whatsapp de cliente ////////
+
 		if ($r)
 		{
 				echo '<script>location.href = "/annuity.php?sendmail=true"</script>';

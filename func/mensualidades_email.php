@@ -227,12 +227,8 @@
 		$wp_body .= "\n\n" .'*CLAVE INTERBANCARIA*';
 		$wp_body .= "\n" .'137873103739151955';
 		
-		$telefonos = explode(",", $_GET['telefono']);
-
-		foreach ($telefonos as $telefono)
-		{
-			SendWP($telefono,$wp_body);
-		}
+		SendWPNOPDF($_GET['telefono'],$wp_body);
+		
 		///////// Se envia notificacion a whatsapp de cliente ////////
 
 		if ($r)
